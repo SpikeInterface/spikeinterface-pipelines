@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 from pydantic import BaseModel, Field
+from pyrsistent import v
 import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
@@ -36,7 +37,7 @@ class HighpassSpatialFilterParameters(BaseModel):
     highpass_butter_order: int = Field(default=3, description="Butterworth order for highpass filter")
     highpass_butter_wn: float = Field(default=0.01, description="Butterworth wn for highpass filter")
 
-class PreprocessingParameters(BaseModel):
+class HDShankPreprocessingParameters(BaseModel):
     preprocessing_strategy: str = Field(default="cmr", description="Preprocessing strategy to use: destripe or cmr")
     highpass_filter: HighpassFilterParameters = Field(default_factory=HighpassFilterParameters, description="Highpass filter parameters")
     phase_shift: PhaseShiftParameters = Field(default_factory=PhaseShiftParameters, description="Phase shift parameters")
@@ -49,10 +50,11 @@ class PreprocessingParameters(BaseModel):
 
 ########################################################################################################################
 
-def do_preprocessing(
+def hd_shank_preprocessing(
     recording: si.BaseRecording,
-    params: PreprocessingParameters,
+    params: HDShankPreprocessingParameters,
     preprocessed_output_folder: Path,
+    verbose: bool = False
 ):
     recording_ps_full = spre.phase_shift(
         recording,
@@ -80,10 +82,11 @@ def do_preprocessing(
     noise_channel_mask = channel_labels == "noise"
     out_channel_mask = channel_labels == "out"
 
-    print("\tBad channel detection:")
-    print(
-        f"\t\t- dead channels - {np.sum(dead_channel_mask)}\n\t\t- noise channels - {np.sum(noise_channel_mask)}\n\t\t- out channels - {np.sum(out_channel_mask)}"
-    )
+    if verbose:
+        print("\tBad channel detection:")
+        print(
+            f"\t\t- dead channels - {np.sum(dead_channel_mask)}\n\t\t- noise channels - {np.sum(noise_channel_mask)}\n\t\t- out channels - {np.sum(out_channel_mask)}"
+        )
     dead_channel_ids = recording_hp_full.channel_ids[dead_channel_mask]
     noise_channel_ids = recording_hp_full.channel_ids[noise_channel_mask]
     out_channel_ids = recording_hp_full.channel_ids[out_channel_mask]
@@ -92,19 +95,21 @@ def do_preprocessing(
 
     max_bad_channel_fraction_to_remove = params.max_bad_channel_fraction_to_remove
 
-    skip_processing = False
+    # skip_processing = False
     if len(all_bad_channel_ids) >= int(
         max_bad_channel_fraction_to_remove * recording.get_num_channels()
     ):
+        # always print this message even if verbose is False?
         print(
             f"\tMore than {max_bad_channel_fraction_to_remove * 100}% bad channels ({len(all_bad_channel_ids)}). "
             f"Skipping further processing for this recording."
         )
-        skip_processing = True
+        # skip_processing = True
         recording_ret = recording_hp_full
     else:
         if params.remove_out_channels:
-            print(f"\tRemoving {len(out_channel_ids)} out channels")
+            if verbose:
+                print(f"\tRemoving {len(out_channel_ids)} out channels")
             recording_rm_out = recording_hp_full.remove_channels(out_channel_ids)
         else:
             recording_rm_out = recording_hp_full
@@ -135,7 +140,8 @@ def do_preprocessing(
             recording_processed = recording_hp_spatial
 
         if params.remove_bad_channels:
-            print(f"\tRemoving {len(bad_channel_ids)} channels after {preproc_strategy} preprocessing")
+            if verbose:
+                print(f"\tRemoving {len(bad_channel_ids)} channels after {preproc_strategy} preprocessing")
             recording_processed = recording_processed.remove_channels(bad_channel_ids)
         recording_saved = recording_processed.save(folder=preprocessed_output_folder / recording_name)
         recording_ret = recording_saved
