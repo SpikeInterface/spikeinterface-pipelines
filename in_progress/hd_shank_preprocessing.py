@@ -56,10 +56,13 @@ def hd_shank_preprocessing(
     preprocessed_output_folder: Path,
     verbose: bool = False
 ):
-    recording_ps_full = spre.phase_shift(
-        recording,
-        margin_ms=params.phase_shift.margin_ms
-    )
+    if "inter_sample_shift" in recording.get_property_keys():
+        recording_ps_full = spre.phase_shift(
+            recording,
+            margin_ms=params.phase_shift.margin_ms
+        )
+    else:
+        recording_ps_full = recording
 
     recording_hp_full = spre.highpass_filter(
         recording_ps_full,
