@@ -1,7 +1,6 @@
 from pathlib import Path
 import numpy as np
 from pydantic import BaseModel, Field
-from pyrsistent import v
 import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
@@ -146,6 +145,7 @@ def hd_shank_preprocessing(
             if verbose:
                 print(f"\tRemoving {len(bad_channel_ids)} channels after {preproc_strategy} preprocessing")
             recording_processed = recording_processed.remove_channels(bad_channel_ids)
+        recording_name = 'recording' # not sure what this should be
         recording_saved = recording_processed.save(folder=preprocessed_output_folder / recording_name)
         recording_ret = recording_saved
     return recording_ret
