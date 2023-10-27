@@ -1,0 +1,21 @@
+[project]
+name = "spikeinterface_pipelines"
+description = "Collection of standardized analysis pipelines based on SpikeInterfacee."
+readme = "README.md"
+authors = [{ name = "My Name", email = "me@email.com" }]
+requires-python = ">=3.8"
+dependencies = ["spikeinterface[full]"]
+keywords = [
+    "spikeinterface",
+    "spike sorting",
+    "electrophysiology",
+    "neuroscience",
+]
+
+[project.urls]
+Homepage = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+Documentation = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
