@@ -1,10 +1,15 @@
 [project]
 name = "spikeinterface_pipelines"
+version = "0.1.0"
 description = "Collection of standardized analysis pipelines based on SpikeInterfacee."
 readme = "README.md"
-authors = [{ name = "My Name", email = "me@email.com" }]
+authors = [
+    { name = "Alessio Buccino", email = "alessiop.buccino@gmail.com" },
+    { name = "Jeremy Magland", email = "jmagland@flatironinstitute.org" },
+    { name = "Luiz Tauffer", email = "luiz.tauffer@catalystneuro.com" },
+]
 requires-python = ">=3.8"
-dependencies = ["spikeinterface[full]"]
+dependencies = ["spikeinterface[full]", "neo>=0.12.0"]
 keywords = [
     "spikeinterface",
     "spike sorting",
@@ -13,9 +18,16 @@ keywords = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/SpikeInterface/spikeinterface_pipelines"
-Documentation = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+homepage = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+documentation = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+repository = "https://github.com/SpikeInterface/spikeinterface_pipelines"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -22,7 +22,7 @@ def postprocessing(
     job_kwargs: JobKwargs,
     postprocessing_params: PostprocessingParamsModel,
     data_folder: Path = Path("../data/"),
-    results_folder: Path = Path("../results/"),
+    results_path: Path = Path("./results/"),
 ) -> None:
     """
     Postprocessing pipeline
@@ -40,7 +40,7 @@ def postprocessing(
     """
     si.set_global_job_kwargs(**job_kwargs.model_dump())
 
-    tmp_folder = results_folder / "tmp"
+    tmp_folder = results_path / "tmp"
     tmp_folder.mkdir()
 
     data_process_prefix = "data_process_postprocessing"

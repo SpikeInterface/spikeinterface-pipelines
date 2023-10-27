@@ -15,9 +15,7 @@ def preprocessing(
     job_kwargs: JobKwargs,
     recording: si.BaseRecording,
     preprocessing_params: PreprocessingParamsModel,
-    results_path: Path = Path("./results/"),
-    debug: bool = False,
-    duration_s: float = 1.
+    results_path: Path = Path("./results/")
 ) -> None | si.BaseRecording:
     """
     Preprocessing pipeline for ephys data.
@@ -37,22 +35,23 @@ def preprocessing(
     """
     si.set_global_job_kwargs(**job_kwargs.model_dump())
 
-    if debug:
-        print(f"DEBUG ENABLED - Only running with {duration_s} seconds")
-
-    recording_name = recording.name
     preprocessing_notes = ""
-    preprocessing_output_process_json = results_path / f"{data_process_prefix}_{recording_name}.json"
-    preprocessing_output_folder = results_path / f"preprocessed_{recording_name}"
-    preprocessing_output_json = results_path / f"preprocessed_{recording_name}.json"
 
-    print(f"Preprocessing recording: {recording_name}")
+    # recording_name = recording.name
+    # preprocessing_output_process_json = results_path / f"{data_process_prefix}_{recording_name}.json"
+    # preprocessing_output_folder = results_path / f"preprocessed_{recording_name}"
+    # preprocessing_output_json = results_path / f"preprocessed_{recording_name}.json"
+
+    print("Preprocessing recording")
     print(f"\tDuration: {np.round(recording.get_total_duration(), 2)} s")
 
+    # Phase shift correction
     recording_ps_full = spre.phase_shift(
         recording,
         **preprocessing_params.phase_shift.model_dump()
     )
+
+    # Highpass filter
     recording_hp_full = spre.highpass_filter(
         recording_ps_full,
         **preprocessing_params.highpass_filter.model_dump()
@@ -89,6 +88,7 @@ def preprocessing(
 
     bad_channel_ids = np.concatenate((dead_channel_ids, noise_channel_ids))
 
+    # Strategy: CMR or destripe
     if preprocessing_params.preprocessing_strategy == "cmr":
         recording_processed = spre.common_reference(
             recording_rm_out,
@@ -106,11 +106,11 @@ def preprocessing(
         recording_processed = recording_processed.remove_channels(bad_channel_ids)
         preprocessing_notes += f"\n- Removed {len(bad_channel_ids)} bad channels after preprocessing.\n"
 
-    # motion correction
+    # Motion correction
     if preprocessing_params.motion_correction.compute:
         preset = preprocessing_params.motion_correction.preset
         print(f"\tComputing motion correction with preset: {preset}")
-        motion_folder = output_path / f"motion_{recording_name}"
+        motion_folder = results_path / "motion_correction"
         recording_corrected = spre.correct_motion(
             recording_processed, preset=preset,
             folder=motion_folder,
