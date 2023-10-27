@@ -140,3 +140,4 @@ class PostprocessingParamsModel(BaseModel):
     template_metrics: TemplateMetrics
     principal_components: PrincipalComponents
     quality_metrics: QualityMetrics
+    duplicate_threshold: float = Field(0.9, description="Duplicate threshold")

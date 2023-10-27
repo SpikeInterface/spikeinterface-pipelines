@@ -11,19 +11,11 @@ import spikeinterface.postprocessing as spost
 import spikeinterface.qualitymetrics as sqm
 import spikeinterface.curation as sc
 
+from ..models import JobKwargs
 from .models import PostprocessingParamsModel
 
 
 warnings.filterwarnings("ignore")
-
-n_jobs_co = os.getenv('CO_CPUS')
-n_jobs = int(n_jobs_co) if n_jobs_co is not None else -1
-
-job_kwargs = {
-    'n_jobs': n_jobs,
-    'chunk_duration': '1s',
-    'progress_bar': True
-}
 
 data_folder = Path("../data/")
 results_folder = Path("../results/")
@@ -34,11 +26,26 @@ tmp_folder.mkdir()
 def postprocessing(
     data_folder: Path,
     results_folder: Path,
-    job_kwargs: dict,
+    job_kwargs: JobKwargs,
     postprocessing_params: PostprocessingParamsModel,
 ) -> None:
+    """
+    Postprocessing pipeline
+
+    Parameters
+    ----------
+    data_folder: Path
+        Path to the data folder
+    results_folder: Path
+        Path to the results folder
+    job_kwargs: JobKwargs
+        Job kwargs
+    postprocessing_params: PostprocessingParamsModel
+        Postprocessing parameters
+    """
+    si.set_global_job_kwargs(**job_kwargs.model_dump())
+
     data_process_prefix = "data_process_postprocessing"
-    si.set_global_job_kwargs(**job_kwargs)
     print("\nPOSTPROCESSING")
     t_postprocessing_start_all = time.perf_counter()
 
@@ -106,9 +113,13 @@ def postprocessing(
         deduplicated_unit_ids = sorting_deduplicated.unit_ids
         
         # use existing deduplicated waveforms to compute sparsity
-        sparsity_raw = si.compute_sparsity(we_raw, **sparsity_params)
+        sparsity_raw = si.compute_sparsity(we_raw, **postprocessing_params.sparsity.model_dump())
         sparsity_mask = sparsity_raw.mask[sorting.ids_to_indices(deduplicated_unit_ids), :]
-        sparsity = si.ChannelSparsity(mask=sparsity_mask, unit_ids=deduplicated_unit_ids, channel_ids=recording.channel_ids)
+        sparsity = si.ChannelSparsity(
+            mask=sparsity_mask,
+            unit_ids=deduplicated_unit_ids,
+            channel_ids=recording.channel_ids
+        )
         shutil.rmtree(wf_dedup_folder)
         del we_raw
 

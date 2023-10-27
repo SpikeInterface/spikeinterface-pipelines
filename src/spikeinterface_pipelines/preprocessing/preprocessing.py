@@ -10,19 +10,11 @@ import spikeinterface.extractors as se
 import spikeinterface.preprocessing as spre
 from spikeinterface.core.core_tools import check_json
 
+from ..models import JobKwargs
 from .models import PreprocessingParamsModel
 
 
 warnings.filterwarnings("ignore")
-
-n_jobs_co = os.getenv('CO_CPUS')
-n_jobs = int(n_jobs_co) if n_jobs_co is not None else -1
-
-job_kwargs = {
-    'n_jobs': n_jobs,
-    'chunk_duration': '1s',
-    'progress_bar': True
-}
 
 data_folder = Path("../data/")
 results_folder = Path("../results/")
@@ -31,13 +23,22 @@ results_folder = Path("../results/")
 def preprocessing(
     data_folder: Path,
     results_folder: Path,
-    job_kwargs: dict,
+    job_kwargs: JobKwargs,
     preprocessing_params: PreprocessingParamsModel,
     debug: bool = False,
     duration_s: float = 1.
 ) -> None:
     """
     Preprocessing pipeline for ephys data.
+
+    Parameters
+    ----------
+    data_folder: Path
+        Path to the data folder.
+    results_folder: Path
+        Path to the results folder.
+    job_kwargs: dict
+        Job kwargs.
     """
 
     data_process_prefix = "data_process_preprocessing"
@@ -45,7 +46,7 @@ def preprocessing(
     if debug:
         print(f"DEBUG ENABLED - Only running with {duration_s} seconds")
 
-    si.set_global_job_kwargs(**job_kwargs)
+    si.set_global_job_kwargs(**job_kwargs.model_dump())
 
     # load job json files
     job_config_json_files = [p for p in data_folder.iterdir() if p.suffix == ".json" and "job" in p.name]
@@ -205,7 +206,7 @@ def preprocessing(
                     recording_corrected = spre.correct_motion(
                         recording_processed, preset=preset,
                         folder=motion_folder,
-                        **job_kwargs
+                        **job_kwargs.model_dump()
                     )
                     if preprocessing_params.motion_correction.apply:
                         print("\tApplying motion correction")
