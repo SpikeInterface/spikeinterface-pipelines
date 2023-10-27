@@ -17,17 +17,12 @@ from .models import PostprocessingParamsModel
 
 warnings.filterwarnings("ignore")
 
-data_folder = Path("../data/")
-results_folder = Path("../results/")
-tmp_folder = results_folder / "tmp"
-tmp_folder.mkdir()
-
 
 def postprocessing(
-    data_folder: Path,
-    results_folder: Path,
     job_kwargs: JobKwargs,
     postprocessing_params: PostprocessingParamsModel,
+    data_folder: Path = Path("../data/"),
+    results_folder: Path = Path("../results/"),
 ) -> None:
     """
     Postprocessing pipeline
@@ -44,6 +39,9 @@ def postprocessing(
         Postprocessing parameters
     """
     si.set_global_job_kwargs(**job_kwargs.model_dump())
+
+    tmp_folder = results_folder / "tmp"
+    tmp_folder.mkdir()
 
     data_process_prefix = "data_process_postprocessing"
     print("\nPOSTPROCESSING")
