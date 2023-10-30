@@ -18,11 +18,11 @@ from .models import PostprocessingParamsModel
 warnings.filterwarnings("ignore")
 
 
+# TODO - WIP
 def postprocessing(
-    job_kwargs: JobKwargs,
-    postprocessing_params: PostprocessingParamsModel,
-    data_folder: Path = Path("../data/"),
-    results_path: Path = Path("./results/"),
+    postprocessing_params: PostprocessingParamsModel = PostprocessingParamsModel(),
+    results_path: Path = Path("./results/postprocessing/"),
+    job_kwargs: JobKwargs = JobKwargs(),
 ) -> None:
     """
     Postprocessing pipeline
