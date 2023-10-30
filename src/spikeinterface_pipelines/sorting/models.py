@@ -5,7 +5,7 @@ from enum import Enum
 
 class SorterName(str, Enum):
     ironclust = "ironclust"
-    kilosort25 = "kilosort25"
+    kilosort25 = "kilosort2_5"
     kilosort3 = "kilosort3"
     mountainsort5 = "mountainsort5"
 
@@ -46,7 +46,7 @@ class MountainSort5Model(BaseModel):
 
 
 class SortingParamsModel(BaseModel):
-    sorter_name: SorterName = Field(default="kilosort25", description="Name of the sorter to use.")
+    sorter_name: SorterName = Field(default="kilosort2_5", description="Name of the sorter to use.")
     sorter_kwargs: Union[
         Kilosort25Model,
         Kilosort3Model,
