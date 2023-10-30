@@ -49,12 +49,12 @@ class MotionCorrection(BaseModel):
 
 class PreprocessingParamsModel(BaseModel):
     preprocessing_strategy: PreprocessingStrategy = Field(default="cmr", description="Strategy for preprocessing")
-    highpass_filter: HighpassFilter
-    phase_shift: PhaseShift
-    detect_bad_channels: DetectBadChannels
+    highpass_filter: HighpassFilter = Field(default=HighpassFilter(), description="Highpass filter")
+    phase_shift: PhaseShift = Field(default=PhaseShift(), description="Phase shift")
+    common_reference: CommonReference = Field(default=CommonReference(), description="Common reference")
+    highpass_spatial_filter: HighpassSpatialFilter = Field(default=HighpassSpatialFilter(), description="Highpass spatial filter")
+    motion_correction: MotionCorrection = Field(default=MotionCorrection(), description="Motion correction")
+    detect_bad_channels: DetectBadChannels = Field(default=DetectBadChannels(), description="Detect bad channels")
     remove_out_channels: bool = Field(default=True, description="Flag to remove out channels")
     remove_bad_channels: bool = Field(default=True, description="Flag to remove bad channels")
     max_bad_channel_fraction_to_remove: float = Field(default=0.5, description="Maximum fraction of bad channels to remove")
-    common_reference: CommonReference
-    highpass_spatial_filter: HighpassSpatialFilter
-    motion_correction: MotionCorrection

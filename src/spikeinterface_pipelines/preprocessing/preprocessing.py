@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 from pathlib import Path
+from typing import Union
 import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
@@ -12,11 +13,11 @@ warnings.filterwarnings("ignore")
 
 
 def preprocessing(
-    job_kwargs: JobKwargs,
     recording: si.BaseRecording,
-    preprocessing_params: PreprocessingParamsModel,
-    results_path: Path = Path("./results/")
-) -> None | si.BaseRecording:
+    preprocessing_params: PreprocessingParamsModel = PreprocessingParamsModel(),
+    results_path: Path = Path("./results/"),
+    job_kwargs: JobKwargs = JobKwargs(),
+) -> si.BaseRecording | None:
     """
     Preprocessing pipeline for ephys data.
 
