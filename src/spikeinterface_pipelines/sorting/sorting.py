@@ -17,10 +17,11 @@ def sorting(
     try:
         sorter = ss.run_sorter(
             recording=recording,
+            sorter_name=sorting_params.sorter_name,
             output_folder=str(results_path / "tmp"),
             verbose=False,
             delete_output_folder=True,
-            **sorting_params.model_dump(),
+            **sorting_params.sorter_kwargs.model_dump(),
         )
         # remove empty units
         sorter = sorter.remove_empty_units()
@@ -30,7 +31,7 @@ def sorting(
         return sorter
     except Exception as e:
         # save log to results
-        results_path.mkdir()
+        results_path.mkdir(exist_ok=True, parents=True)
         if (results_path / "tmp").exists():
             shutil.copy(results_path / "tmp/spikeinterface_log.json", results_path)
         raise e

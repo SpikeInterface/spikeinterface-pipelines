@@ -15,7 +15,7 @@ def pipeline(
     sorting_params: SortingParamsModel = SortingParamsModel(),
     postprocessing_params: PostprocessingParamsModel = PostprocessingParamsModel(),
     run_preprocessing: bool = True,
-) -> None:
+) -> si.BaseSorting:
     # Paths
     results_path_preprocessing = results_path / "preprocessing"
     results_path_sorting = results_path / "sorting"
@@ -40,6 +40,8 @@ def pipeline(
         sorting_params=sorting_params,
         results_path=results_path_sorting,
     )
+
+    return sorter
 
     # #  TODO - Postprocessing
     # postprocessing(postprocessing_params=postprocessing_params)
