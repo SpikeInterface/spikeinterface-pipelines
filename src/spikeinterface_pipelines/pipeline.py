@@ -5,7 +5,7 @@ import spikeinterface as si
 from .logger import logger
 from .preprocessing import preprocessing, PreprocessingParamsModel
 from .sorting import sorting, SortingParamsModel
-from .postprocessing import postprocessing, PostprocessingParamsModel
+# from .postprocessing import postprocessing, PostprocessingParamsModel
 
 
 # TODO - WIP
@@ -14,7 +14,7 @@ def pipeline(
     results_path: Path = Path("./results/"),
     preprocessing_params: PreprocessingParamsModel = PreprocessingParamsModel(),
     sorting_params: SortingParamsModel = SortingParamsModel(),
-    postprocessing_params: PostprocessingParamsModel = PostprocessingParamsModel(),
+    # postprocessing_params: PostprocessingParamsModel = PostprocessingParamsModel(),
     run_preprocessing: bool = True,
 ) -> Tuple[si.BaseRecording, si.BaseSorting]:
     # Paths
