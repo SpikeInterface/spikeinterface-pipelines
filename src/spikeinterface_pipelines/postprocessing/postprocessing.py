@@ -47,32 +47,25 @@ def postprocess(
     # first extract some raw waveforms in memory to deduplicate based on peak alignment
     wf_dedup_folder = tmp_folder / "waveforms_dense"
     waveform_extractor_raw = si.extract_waveforms(
-        recording,
-        sorting,
-        folder=wf_dedup_folder,
-        sparse=False,
-        **postprocessing_params.waveforms_raw.model_dump()
+        recording, sorting, folder=wf_dedup_folder, sparse=False, **postprocessing_params.waveforms_raw.model_dump()
     )
 
     # de-duplication
     sorting_deduplicated = sc.remove_redundant_units(
-        waveform_extractor_raw,
-        duplicate_threshold=postprocessing_params.duplicate_threshold
+        waveform_extractor_raw, duplicate_threshold=postprocessing_params.duplicate_threshold
     )
-    logger.info(f"[Postprocessing] \tNumber of original units: {len(waveform_extractor_raw.sorting.unit_ids)} -- Number of units after de-duplication: {len(sorting_deduplicated.unit_ids)}")
+    logger.info(
+        f"[Postprocessing] \tNumber of original units: {len(waveform_extractor_raw.sorting.unit_ids)} -- Number of units after de-duplication: {len(sorting_deduplicated.unit_ids)}"
+    )
     deduplicated_unit_ids = sorting_deduplicated.unit_ids
-    
+
     # use existing deduplicated waveforms to compute sparsity
     sparsity_raw = si.compute_sparsity(waveform_extractor_raw, **postprocessing_params.sparsity.model_dump())
     sparsity_mask = sparsity_raw.mask[sorting.ids_to_indices(deduplicated_unit_ids), :]
-    sparsity = si.ChannelSparsity(
-        mask=sparsity_mask,
-        unit_ids=deduplicated_unit_ids,
-        channel_ids=recording.channel_ids
-    )
+    sparsity = si.ChannelSparsity(mask=sparsity_mask, unit_ids=deduplicated_unit_ids, channel_ids=recording.channel_ids)
 
     # this is a trick to make the postprocessed folder "self-contained
-    sorting_folder = results_folder / "sorting" 
+    sorting_folder = results_folder / "sorting"
     sorting_deduplicated = sorting_deduplicated.save(folder=sorting_folder)
 
     # now extract waveforms on de-duplicated units
@@ -84,7 +77,7 @@ def postprocess(
         sparsity=sparsity,
         sparse=True,
         overwrite=True,
-        **postprocessing_params.waveforms.model_dump()
+        **postprocessing_params.waveforms.model_dump(),
     )
 
     logger.info("[Postprocessing] \tComputing spike amplitides")
@@ -102,7 +95,9 @@ def postprocess(
     logger.info("[Postprocessing] \tComputing template metrics")
     _ = spost.compute_template_metrics(waveform_extractor, **postprocessing_params.template_metrics.model_dump())
     logger.info("[Postprocessing] \tComputing PCA")
-    _ = spost.compute_principal_components(waveform_extractor, **postprocessing_params.principal_components.model_dump())
+    _ = spost.compute_principal_components(
+        waveform_extractor, **postprocessing_params.principal_components.model_dump()
+    )
     logger.info("[Postprocessing] \tComputing quality metrics")
     _ = sqm.compute_quality_metrics(waveform_extractor, **postprocessing_params.quality_metrics.model_dump())
 

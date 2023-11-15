@@ -44,28 +44,23 @@ def preprocess(
     # Phase shift correction
     if "inter_sample_shift" in recording.get_property_keys():
         logger.info(f"[Preprocessing] \tPhase shift")
-        recording = spre.phase_shift(
-            recording,
-            **preprocessing_params.phase_shift.model_dump()
-        )
+        recording = spre.phase_shift(recording, **preprocessing_params.phase_shift.model_dump())
     else:
         logger.info(f"[Preprocessing] \tSkipping phase shift: 'inter_sample_shift' property not found")
 
     # Highpass filter
-    recording_hp_full = spre.highpass_filter(
-        recording,
-        **preprocessing_params.highpass_filter.model_dump()
-    )
+    recording_hp_full = spre.highpass_filter(recording, **preprocessing_params.highpass_filter.model_dump())
 
     # Detect and remove bad channels
     _, channel_labels = spre.detect_bad_channels(
-        recording_hp_full,
-        **preprocessing_params.detect_bad_channels.model_dump()
+        recording_hp_full, **preprocessing_params.detect_bad_channels.model_dump()
     )
     dead_channel_mask = channel_labels == "dead"
     noise_channel_mask = channel_labels == "noise"
     out_channel_mask = channel_labels == "out"
-    logger.info(f"[Preprocessing] \tBad channel detection found: {np.sum(dead_channel_mask)} dead, {np.sum(noise_channel_mask)} noise, {np.sum(out_channel_mask)} out channels")
+    logger.info(
+        f"[Preprocessing] \tBad channel detection found: {np.sum(dead_channel_mask)} dead, {np.sum(noise_channel_mask)} noise, {np.sum(out_channel_mask)} out channels"
+    )
     dead_channel_ids = recording_hp_full.channel_ids[dead_channel_mask]
     noise_channel_ids = recording_hp_full.channel_ids[noise_channel_mask]
     out_channel_ids = recording_hp_full.channel_ids[out_channel_mask]
@@ -73,7 +68,9 @@ def preprocess(
 
     max_bad_channel_fraction_to_remove = preprocessing_params.max_bad_channel_fraction_to_remove
     if len(all_bad_channel_ids) >= int(max_bad_channel_fraction_to_remove * recording.get_num_channels()):
-        logger.info(f"[Preprocessing] \tMore than {max_bad_channel_fraction_to_remove * 100}% bad channels ({len(all_bad_channel_ids)}). ")
+        logger.info(
+            f"[Preprocessing] \tMore than {max_bad_channel_fraction_to_remove * 100}% bad channels ({len(all_bad_channel_ids)}). "
+        )
         logger.info("[Preprocessing] \tSkipping further processing for this recording.")
         return None
 
@@ -88,18 +85,18 @@ def preprocess(
     # Denoise: CMR or destripe
     if preprocessing_params.preprocessing_strategy == "cmr":
         recording_processed = spre.common_reference(
-            recording_rm_out,
-            **preprocessing_params.common_reference.model_dump()
+            recording_rm_out, **preprocessing_params.common_reference.model_dump()
         )
     else:
         recording_interp = spre.interpolate_bad_channels(recording_rm_out, bad_channel_ids)
         recording_processed = spre.highpass_spatial_filter(
-            recording_interp,
-            **preprocessing_params.highpass_spatial_filter.model_dump()
+            recording_interp, **preprocessing_params.highpass_spatial_filter.model_dump()
         )
 
     if preprocessing_params.remove_bad_channels:
-        logger.info(f"[Preprocessing] \tRemoving {len(bad_channel_ids)} channels after {preprocessing_params.preprocessing_strategy} preprocessing")
+        logger.info(
+            f"[Preprocessing] \tRemoving {len(bad_channel_ids)} channels after {preprocessing_params.preprocessing_strategy} preprocessing"
+        )
         recording_processed = recording_processed.remove_channels(bad_channel_ids)
 
     # Motion correction
@@ -108,9 +105,7 @@ def preprocess(
         logger.info(f"[Preprocessing] \tComputing motion correction with preset: {preset}")
         motion_folder = results_folder / "motion_correction"
         recording_corrected = spre.correct_motion(
-            recording_processed, preset=preset,
-            folder=motion_folder,
-            verbose=False
+            recording_processed, preset=preset, folder=motion_folder, verbose=False
         )
         if preprocessing_params.motion_correction.apply:
             logger.info("[Preprocessing] \tApplying motion correction")

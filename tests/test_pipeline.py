@@ -41,7 +41,7 @@ def test_preprocessing(tmp_path, generate_recording):
         recording=recording,
         preprocessing_params=PreprocessingParams(),
         results_folder=results_folder,
-        scratch_folder=scratch_folder
+        scratch_folder=scratch_folder,
     )
 
     assert isinstance(recording_processed, si.BaseRecording)
@@ -60,7 +60,7 @@ def test_spikesorting(tmp_path, generate_recording):
         recording=recording,
         spikesorting_params=SpikeSortingParams(),
         results_folder=results_folder,
-        scratch_folder=scratch_folder
+        scratch_folder=scratch_folder,
     )
 
     assert isinstance(sorting, si.BaseSorting)
@@ -79,7 +79,7 @@ def test_postprocessing(tmp_path, generate_recording):
         sorting=sorting,
         postprocessing_params=PostprocessingParams(),
         results_folder=results_folder,
-        scratch_folder=scratch_folder
+        scratch_folder=scratch_folder,
     )
 
     assert isinstance(waveform_extractor, si.WaveformExtractor)
@@ -104,7 +104,7 @@ def test_pipeline(tmp_path, generate_recording):
         recording=recording,
         results_folder=results_folder,
         scratch_folder=scratch_folder,
-        spikesorting_params=spikesorting_params
+        spikesorting_params=spikesorting_params,
     )
 
     assert isinstance(recording_processed, si.BaseRecording)
@@ -129,4 +129,3 @@ if __name__ == "__main__":
 
     print("TEST PIPELINE")
     test_pipeline(tmp_folder, (recording, sorting))
-    

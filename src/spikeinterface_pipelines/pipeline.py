@@ -22,7 +22,6 @@ def run_pipeline(
     postprocessing_params: PostprocessingParams = PostprocessingParams(),
     run_preprocessing: bool = True,
 ) -> Tuple[si.BaseRecording, si.BaseSorting, si.WaveformExtractor]:
-
     # Create folders
     scratch_folder.mkdir(exist_ok=True, parents=True)
     results_folder.mkdir(exist_ok=True, parents=True)
