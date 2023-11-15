@@ -74,7 +74,7 @@ class QMParams(BaseModel):
 
 class QualityMetrics(BaseModel):
     qm_params: QMParams = Field(default=QMParams(), description="Quality metric parameters.")
-    metric_names: List[str] = Field(default=[], description="List of metric names to compute.")
+    metric_names: List[str] = Field(default=None, description="List of metric names to compute.")
     n_jobs: int = Field(default=1, description="Number of jobs.")
 
 
@@ -82,6 +82,15 @@ class Sparsity(BaseModel):
     method: str = Field(default="radius", description="Method for determining sparsity.")
     radius_um: int = Field(default=100, description="Radius in micrometers for sparsity.")
 
+
+class WaveformsRaw(BaseModel):
+    ms_before: float = Field(default=1.0, description="Milliseconds before")
+    ms_after: float = Field(default=2.0, description="Milliseconds after")
+    max_spikes_per_unit: int = Field(default=100, description="Maximum spikes per unit")
+    return_scaled: bool = Field(default=True, description="Flag to determine if results should be scaled")
+    dtype: Optional[str] = Field(default=None, description="Data type for the waveforms")
+    precompute_template: Tuple[str, str] = Field(default=("average", "std"), description="Precomputation template method")
+    use_relative_path: bool = Field(default=True, description="Use relative paths")
 
 class Waveforms(BaseModel):
     ms_before: float = Field(default=3.0, description="Milliseconds before")
@@ -128,9 +137,9 @@ class PrincipalComponents(BaseModel):
     whiten: bool = Field(default=True, description="Whiten the components")
 
 
-class PostprocessingParamsModel(BaseModel):
+class PostprocessingParams(BaseModel):
     sparsity: Sparsity = Field(default=Sparsity(), description="Sparsity")
-    waveforms_deduplicate: Waveforms = Field(default=Waveforms(), description="Waveforms deduplicate")
+    waveforms_raw: WaveformsRaw = Field(default=WaveformsRaw(), description="Waveforms raw")
     waveforms: Waveforms = Field(default=Waveforms(), description="Waveforms")
     spike_amplitudes: SpikeAmplitudes = Field(default=SpikeAmplitudes(), description="Spike amplitudes")
     similarity: Similarity = Field(default=Similarity(), description="Similarity")

@@ -24,7 +24,7 @@ class Kilosort25Model(BaseModel):
     nPCs: int = Field(default=3, description="Number of PCA dimensions")
     ntbuff: int = Field(default=64, description="Samples of symmetrical buffer for whitening and spike detection")
     nfilt_factor: int = Field(default=4, description="Max number of clusters per good channel (even temporary ones) 4")
-    NT: int = Field(default=-1, description='Batch size (if -1 it is automatically computed)')
+    NT: int = Field(default=None, description='Batch size (if None it is automatically computed)')
     AUCsplit: float = Field(default=0.9, description="Threshold on the area under the curve (AUC) criterion for performing a split in the final step")
     do_correction: bool = Field(default=True, description="If True drift registration is applied")
     wave_length: float = Field(default=61, description="size of the waveform extracted around each detected peak, (Default 61, maximum 81)")
@@ -45,7 +45,7 @@ class MountainSort5Model(BaseModel):
     pass
 
 
-class SortingParamsModel(BaseModel):
+class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(default="kilosort2_5", description="Name of the sorter to use.")
     sorter_kwargs: Union[
         Kilosort25Model,

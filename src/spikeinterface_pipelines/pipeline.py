@@ -1,33 +1,48 @@
 from pathlib import Path
+import re
 from typing import Tuple
+
 import spikeinterface as si
 
 from .logger import logger
-from .preprocessing import preprocessing, PreprocessingParamsModel
-from .sorting import sorting, SortingParamsModel
-# from .postprocessing import postprocessing, PostprocessingParamsModel
+from .global_params import JobKwargs
+from .preprocessing import preprocess, PreprocessingParams
+from .spikesorting import spikesort, SpikeSortingParams
+from .postprocessing import postprocess, PostprocessingParams
 
 
 # TODO - WIP
-def pipeline(
+def run_pipeline(
     recording: si.BaseRecording,
-    results_path: Path = Path("./results/"),
-    preprocessing_params: PreprocessingParamsModel = PreprocessingParamsModel(),
-    sorting_params: SortingParamsModel = SortingParamsModel(),
-    # postprocessing_params: PostprocessingParamsModel = PostprocessingParamsModel(),
+    scratch_folder: Path = Path("./scratch/"),
+    results_folder: Path = Path("./results/"),
+    job_kwargs: JobKwargs = JobKwargs(),
+    preprocessing_params: PreprocessingParams = PreprocessingParams(),
+    spikesorting_params: SpikeSortingParams = SpikeSortingParams(),
+    postprocessing_params: PostprocessingParams = PostprocessingParams(),
     run_preprocessing: bool = True,
-) -> Tuple[si.BaseRecording, si.BaseSorting]:
+) -> Tuple[si.BaseRecording, si.BaseSorting, si.WaveformExtractor]:
+
+    # Create folders
+    scratch_folder.mkdir(exist_ok=True, parents=True)
+    results_folder.mkdir(exist_ok=True, parents=True)
+
     # Paths
-    results_path_preprocessing = results_path / "preprocessing"
-    results_path_sorting = results_path / "sorting"
+    results_folder_preprocessing = results_folder / "preprocessing"
+    results_folder_spikesorting = results_folder / "spikesorting"
+    results_folder_postprocessing = results_folder / "postprocessing"
+
+    # set global job kwargs
+    si.set_global_job_kwargs(**job_kwargs.model_dump())
 
     # Preprocessing
     if run_preprocessing:
         logger.info("Preprocessing recording")
-        recording_preprocessed = preprocessing(
+        recording_preprocessed = preprocess(
             recording=recording,
             preprocessing_params=preprocessing_params,
-            results_path=results_path_preprocessing,
+            scratch_folder=scratch_folder,
+            results_folder=results_folder_preprocessing,
         )
         if recording_preprocessed is None:
             raise Exception("Preprocessing failed")
@@ -36,13 +51,26 @@ def pipeline(
         recording_preprocessed = recording
 
     # Spike Sorting
-    sorter = sorting(
+    sorting = spikesort(
         recording=recording_preprocessed,
-        sorting_params=sorting_params,
-        results_path=results_path_sorting,
+        scratch_folder=scratch_folder,
+        spikesorting_params=spikesorting_params,
+        results_folder=results_folder_spikesorting,
+    )
+    if sorting is None:
+        raise Exception("Spike sorting failed")
+
+    # Postprocessing
+    waveform_extractor = postprocess(
+        recording=recording_preprocessed,
+        sorting=sorting,
+        postprocessing_params=postprocessing_params,
+        scratch_folder=scratch_folder,
+        results_folder=results_folder_postprocessing,
     )
 
-    # #  TODO - Postprocessing
-    # postprocessing(postprocessing_params=postprocessing_params)
+    # TODO: Curation
 
-    return (recording_preprocessed, sorter)
+    # TODO: Visualization
+
+    return (recording_preprocessed, sorting, waveform_extractor)

@@ -1,2 +1,2 @@
-from .postprocessing import postprocessing
-from .models import PostprocessingParamsModel
+from .postprocessing import postprocess
+from .params import PostprocessingParams

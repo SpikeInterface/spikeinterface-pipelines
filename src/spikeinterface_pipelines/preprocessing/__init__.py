@@ -1,2 +1,2 @@
-from .preprocessing import preprocessing
-from .models import PreprocessingParamsModel
+from .preprocessing import preprocess
+from .params import PreprocessingParams

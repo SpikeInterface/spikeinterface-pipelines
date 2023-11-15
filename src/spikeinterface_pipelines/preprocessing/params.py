@@ -47,7 +47,7 @@ class MotionCorrection(BaseModel):
     preset: str = Field(default="nonrigid_accurate", description="Preset for motion correction")
 
 
-class PreprocessingParamsModel(BaseModel):
+class PreprocessingParams(BaseModel):
     preprocessing_strategy: PreprocessingStrategy = Field(default="cmr", description="Strategy for preprocessing")
     highpass_filter: HighpassFilter = Field(default=HighpassFilter(), description="Highpass filter")
     phase_shift: PhaseShift = Field(default=PhaseShift(), description="Phase shift")
