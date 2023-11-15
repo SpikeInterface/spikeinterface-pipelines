@@ -1,0 +1,36 @@
+[project]
+name = "spikeinterface_pipelines"
+version = "0.0.2"
+description = "Collection of standardized analysis pipelines based on SpikeInterfacee."
+readme = "README.md"
+authors = [
+    { name = "Alessio Buccino", email = "alessiop.buccino@gmail.com" },
+    { name = "Jeremy Magland", email = "jmagland@flatironinstitute.org" },
+    { name = "Luiz Tauffer", email = "luiz.tauffer@catalystneuro.com" },
+]
+requires-python = ">=3.8"
+dependencies = ["spikeinterface[full]", "neo>=0.12.0", "pydantic>=2.4.2"]
+keywords = [
+    "spikeinterface",
+    "spike sorting",
+    "electrophysiology",
+    "neuroscience",
+]
+
+[project.urls]
+homepage = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+documentation = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+repository = "https://github.com/SpikeInterface/spikeinterface_pipelines"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 120
