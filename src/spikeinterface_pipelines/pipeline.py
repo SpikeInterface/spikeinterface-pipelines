@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 from typing import Tuple
 
 import spikeinterface as si
