@@ -10,7 +10,6 @@ from .spikesorting import spikesort, SpikeSortingParams
 from .postprocessing import postprocess, PostprocessingParams
 
 
-# TODO - WIP
 def run_pipeline(
     recording: si.BaseRecording,
     scratch_folder: Path = Path("./scratch/"),
