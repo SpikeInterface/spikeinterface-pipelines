@@ -12,15 +12,17 @@ from .postprocessing import postprocess, PostprocessingParams
 
 def run_pipeline(
     recording: si.BaseRecording,
-    scratch_folder: Path = Path("./scratch/"),
-    results_folder: Path = Path("./results/"),
-    job_kwargs: JobKwargs = JobKwargs(),
-    preprocessing_params: PreprocessingParams = PreprocessingParams(),
-    spikesorting_params: SpikeSortingParams = SpikeSortingParams(),
-    postprocessing_params: PostprocessingParams = PostprocessingParams(),
+    scratch_folder: Path | str = Path("./scratch/"),
+    results_folder: Path | str = Path("./results/"),
+    job_kwargs: JobKwargs | dict = JobKwargs(),
+    preprocessing_params: PreprocessingParams | dict = PreprocessingParams(),
+    spikesorting_params: SpikeSortingParams | dict = SpikeSortingParams(),
+    postprocessing_params: PostprocessingParams | dict = PostprocessingParams(),
     run_preprocessing: bool = True,
 ) -> Tuple[si.BaseRecording, si.BaseSorting, si.WaveformExtractor]:
     # Create folders
+    results_folder = Path(results_folder)
+    scratch_folder = Path(scratch_folder)
     scratch_folder.mkdir(exist_ok=True, parents=True)
     results_folder.mkdir(exist_ok=True, parents=True)
 
@@ -28,6 +30,16 @@ def run_pipeline(
     results_folder_preprocessing = results_folder / "preprocessing"
     results_folder_spikesorting = results_folder / "spikesorting"
     results_folder_postprocessing = results_folder / "postprocessing"
+
+    # Arguments Models validation, in case of dict
+    if isinstance(job_kwargs, dict):
+        job_kwargs = JobKwargs(**job_kwargs)
+    if isinstance(preprocessing_params, dict):
+        preprocessing_params = PreprocessingParams(**preprocessing_params)
+    if isinstance(spikesorting_params, dict):
+        spikesorting_params = SpikeSortingParams(**spikesorting_params)
+    if isinstance(postprocessing_params, dict):
+        postprocessing_params = PostprocessingParams(**postprocessing_params)
 
     # set global job kwargs
     si.set_global_job_kwargs(**job_kwargs.model_dump())
