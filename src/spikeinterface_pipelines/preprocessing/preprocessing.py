@@ -43,10 +43,10 @@ def preprocess(
 
     # Phase shift correction
     if "inter_sample_shift" in recording.get_property_keys():
-        logger.info(f"[Preprocessing] \tPhase shift")
+        logger.info("[Preprocessing] \tPhase shift")
         recording = spre.phase_shift(recording, **preprocessing_params.phase_shift.model_dump())
     else:
-        logger.info(f"[Preprocessing] \tSkipping phase shift: 'inter_sample_shift' property not found")
+        logger.info("[Preprocessing] \tSkipping phase shift: 'inter_sample_shift' property not found")
 
     # Highpass filter
     recording_hp_full = spre.highpass_filter(recording, **preprocessing_params.highpass_filter.model_dump())

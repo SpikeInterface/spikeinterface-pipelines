@@ -1,6 +1,6 @@
 from pathlib import Path
 import shutil
-
+from typing import Union
 import spikeinterface as si
 import spikeinterface.sorters as ss
 import spikeinterface.curation as sc
@@ -14,7 +14,7 @@ def spikesort(
     spikesorting_params: SpikeSortingParams = SpikeSortingParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/spikesorting/"),
-) -> si.BaseSorting | None:
+) -> Union[si.BaseSorting, None]:
     """
     Apply spike sorting to recording
 

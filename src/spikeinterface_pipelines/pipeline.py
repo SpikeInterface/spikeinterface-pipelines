@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 import spikeinterface as si
 
@@ -12,12 +12,12 @@ from .postprocessing import postprocess, PostprocessingParams
 
 def run_pipeline(
     recording: si.BaseRecording,
-    scratch_folder: Path | str = Path("./scratch/"),
-    results_folder: Path | str = Path("./results/"),
-    job_kwargs: JobKwargs | dict = JobKwargs(),
-    preprocessing_params: PreprocessingParams | dict = PreprocessingParams(),
-    spikesorting_params: SpikeSortingParams | dict = SpikeSortingParams(),
-    postprocessing_params: PostprocessingParams | dict = PostprocessingParams(),
+    scratch_folder: Union[Path, str] = Path("./scratch/"),
+    results_folder: Union[Path, str] = Path("./results/"),
+    job_kwargs: Union[JobKwargs, dict] = JobKwargs(),
+    preprocessing_params: Union[PreprocessingParams, dict] = PreprocessingParams(),
+    spikesorting_params: Union[SpikeSortingParams, dict] = SpikeSortingParams(),
+    postprocessing_params: Union[PostprocessingParams, dict] = PostprocessingParams(),
     run_preprocessing: bool = True,
 ) -> Tuple[si.BaseRecording, si.BaseSorting, si.WaveformExtractor]:
     # Create folders
