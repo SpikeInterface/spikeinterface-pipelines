@@ -1,5 +1,6 @@
+from __future__ import annotations
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple
 
 import spikeinterface as si
 
@@ -12,14 +13,20 @@ from .postprocessing import postprocess, PostprocessingParams
 
 def run_pipeline(
     recording: si.BaseRecording,
-    scratch_folder: Union[Path, str] = Path("./scratch/"),
-    results_folder: Union[Path, str] = Path("./results/"),
-    job_kwargs: Union[JobKwargs, dict] = JobKwargs(),
-    preprocessing_params: Union[PreprocessingParams, dict] = PreprocessingParams(),
-    spikesorting_params: Union[SpikeSortingParams, dict] = SpikeSortingParams(),
-    postprocessing_params: Union[PostprocessingParams, dict] = PostprocessingParams(),
+    scratch_folder: Path | str = Path("./scratch/"),
+    results_folder: Path | str = Path("./results/"),
+    job_kwargs: JobKwargs | dict = JobKwargs(),
+    preprocessing_params: PreprocessingParams | dict = PreprocessingParams(),
+    spikesorting_params: SpikeSortingParams | dict = SpikeSortingParams(),
+    postprocessing_params: PostprocessingParams | dict = PostprocessingParams(),
     run_preprocessing: bool = True,
-) -> Tuple[si.BaseRecording, si.BaseSorting, si.WaveformExtractor]:
+    run_spikesorting: bool = True,
+    run_postprocessing: bool = True,
+) -> Tuple[
+    si.BaseRecording | None,
+    si.BaseSorting | None,
+    si.WaveformExtractor | None
+]:
     # Create folders
     results_folder = Path(results_folder)
     scratch_folder = Path(scratch_folder)
@@ -60,23 +67,33 @@ def run_pipeline(
         recording_preprocessed = recording
 
     # Spike Sorting
-    sorting = spikesort(
-        recording=recording_preprocessed,
-        scratch_folder=scratch_folder,
-        spikesorting_params=spikesorting_params,
-        results_folder=results_folder_spikesorting,
-    )
-    if sorting is None:
-        raise Exception("Spike sorting failed")
+    if run_spikesorting:
+        sorting = spikesort(
+            recording=recording_preprocessed,
+            scratch_folder=scratch_folder,
+            spikesorting_params=spikesorting_params,
+            results_folder=results_folder_spikesorting,
+        )
+        if sorting is None:
+            raise Exception("Spike sorting failed")
 
-    # Postprocessing
-    waveform_extractor = postprocess(
-        recording=recording_preprocessed,
-        sorting=sorting,
-        postprocessing_params=postprocessing_params,
-        scratch_folder=scratch_folder,
-        results_folder=results_folder_postprocessing,
-    )
+        # Postprocessing
+        if run_postprocessing:
+            logger.info("Postprocessing sorting")
+            waveform_extractor = postprocess(
+                recording=recording_preprocessed,
+                sorting=sorting,
+                postprocessing_params=postprocessing_params,
+                scratch_folder=scratch_folder,
+                results_folder=results_folder_postprocessing,
+            )
+        else:
+            logger.info("Skipping postprocessing")
+            waveform_extractor = None
+    else:
+        logger.info("Skipping spike sorting")
+        sorting = None
+        waveform_extractor = None
 
     # TODO: Curation
 

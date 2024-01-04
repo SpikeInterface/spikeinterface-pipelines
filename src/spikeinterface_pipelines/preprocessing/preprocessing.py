@@ -72,7 +72,7 @@ def preprocess(
             f"[Preprocessing] \tMore than {max_bad_channel_fraction_to_remove * 100}% bad channels ({len(all_bad_channel_ids)}). "
         )
         logger.info("[Preprocessing] \tSkipping further processing for this recording.")
-        return None
+        return recording_hp_full
 
     if preprocessing_params.remove_out_channels:
         logger.info(f"[Preprocessing] \tRemoving {len(out_channel_ids)} out channels")

@@ -28,6 +28,7 @@ class Kilosort25Model(BaseModel):
     sig: float = Field(default=20, description="spatial smoothness constant for registration")
     freq_min: float = Field(default=150, description="High-pass filter cutoff frequency")
     sigmaMask: float = Field(default=30, description="Spatial constant in um for computing residual variance of spike")
+    lam: float = Field(default=10.0, description="The importance of the amplitude penalty (like in Kilosort1: 0 means not used, 10 is average, 50 is a lot)")
     nPCs: int = Field(default=3, description="Number of PCA dimensions")
     ntbuff: int = Field(default=64, description="Samples of symmetrical buffer for whitening and spike detection")
     nfilt_factor: int = Field(default=4, description="Max number of clusters per good channel (even temporary ones) 4")
@@ -40,7 +41,7 @@ class Kilosort25Model(BaseModel):
     wave_length: float = Field(
         default=61, description="size of the waveform extracted around each detected peak, (Default 61, maximum 81)"
     )
-    keep_good_only: bool = Field(default=True, description="If True only 'good' units are returned")
+    keep_good_only: bool = Field(default=False, description="If True only 'good' units are returned")
     skip_kilosort_preprocessing: bool = Field(
         default=False, description="Can optionaly skip the internal kilosort preprocessing"
     )
