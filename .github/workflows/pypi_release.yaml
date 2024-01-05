@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - src/spikeinterface_pipelines/**
+      - pyproject.toml
 
 jobs:
   pypi-release:
