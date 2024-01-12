@@ -110,7 +110,6 @@ def preprocess(
             folder=motion_folder,
             verbose=False,
             detect_kwargs=preprocessing_params.motion_correction.motion_kwargs.detect_kwargs.model_dump(),
-            select_kwargs=dict(),
             localize_peaks_kwargs=preprocessing_params.motion_correction.motion_kwargs.localize_peaks_kwargs.model_dump(),
             estimate_motion_kwargs=preprocessing_params.motion_correction.motion_kwargs.estimate_motion_kwargs.model_dump(),
             interpolate_motion_kwargs=preprocessing_params.motion_correction.motion_kwargs.interpolate_motion_kwargs.model_dump(),
