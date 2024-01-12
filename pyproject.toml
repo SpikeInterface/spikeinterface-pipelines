@@ -1,6 +1,6 @@
 [project]
 name = "spikeinterface_pipelines"
-version = "0.0.3"
+version = "0.0.4"
 description = "Collection of standardized analysis pipelines based on SpikeInterfacee."
 readme = "README.md"
 authors = [
