@@ -100,7 +100,7 @@ def preprocess(
         recording_processed = recording_processed.remove_channels(bad_channel_ids)
 
     # Motion correction
-    if preprocessing_params.motion_correction.compute:
+    if preprocessing_params.motion_correction.strategy != "skip":
         preset = preprocessing_params.motion_correction.preset
         if preset == "nonrigid_accurate":
             motion_correction_kwargs = MCNonrigidAccurate(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
@@ -120,7 +120,7 @@ def preprocess(
             estimate_motion_kwargs=motion_correction_kwargs.estimate_motion_kwargs.model_dump(),
             interpolate_motion_kwargs=motion_correction_kwargs.interpolate_motion_kwargs.model_dump(),
         )
-        if preprocessing_params.motion_correction.apply:
+        if preprocessing_params.motion_correction.strategy == "apply":
             logger.info("[Preprocessing] \tApplying motion correction")
             recording_processed = recording_corrected
 

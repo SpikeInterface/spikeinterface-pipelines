@@ -153,8 +153,7 @@ class MCPreset(str, Enum):
 
 
 class MotionCorrection(BaseModel):
-    compute: bool = Field(default=True, description="Whether to compute motion correction")
-    apply: bool = Field(default=False, description="Whether to apply motion correction")
+    strategy: Literal["skip", "compute", "apply"] = Field(default="compute", description="What strategy to use for motion correction")
     preset: MCPreset = Field(default=MCPreset.nonrigid_accurate.value, description="Preset for motion correction")
     motion_kwargs: Union[MCNonrigidAccurate, MCRigidFast, MCKilosortLike] = Field(default=MCNonrigidAccurate(), description="Motion correction parameters")
 
