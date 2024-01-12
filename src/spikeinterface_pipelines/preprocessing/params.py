@@ -56,7 +56,7 @@ class MCLocalizeCenterOfMass(BaseModel):
 
 
 class MCLocalizeMonopolarTriangulation(BaseModel):
-    radius_um: float = Field(default=75.0, description="For channel sparsity.")
+    radius_um: float = Field(default=75.0, description="Radius in um for channel sparsity.")
     max_distance_um: float = Field(default=150.0, description="Boundary for distance estimation.")
     optimizer: str = Field(default="minimize_with_log_penality", description="")
     enforce_decrease: bool = Field(default=True, description="Enforce spatial decreasingness for PTP vectors")
