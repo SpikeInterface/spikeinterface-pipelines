@@ -43,11 +43,11 @@ class HighpassSpatialFilter(BaseModel):
 
 # Motion correction ---------------------------------------------------------------
 class MCDetectKwargs(BaseModel):
-    method: str = Field(default="locally_exclusive", description="")
-    peak_sign: str = Field(default="neg", description="")
-    detect_threshold: float = Field(default=8.0, description="")
-    exclude_sweep_ms: float = Field(default=0.1, description="")
-    radius_um: float = Field(default=50.0, description="")
+    method: str = Field(default="locally_exclusive", description="The method for peak detection.")
+    peak_sign: Literal["pos", "neg", "both] = Field(default="neg", description="The peak sign to detect peaks.")
+    detect_threshold: float = Field(default=8.0, description="The detection threshold in MAD units.")
+    exclude_sweep_ms: float = Field(default=0.1, description="The time sweep to exclude for time de-duplication.")
+    radius_um: float = Field(default=50.0, description="The radius in um for channel de-duplication.")
 
 
 class MCLocalizeCenterOfMass(BaseModel):
