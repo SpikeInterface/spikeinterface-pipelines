@@ -94,9 +94,10 @@ class QMParams(BaseModel):
     nn_noise_overlap: NNIsolation = Field(default=NNIsolation(), description="Nearest neighbor noise overlap.")
 
 
+# TODO - fill in metric_names defauklt value with all the metric names
 class QualityMetrics(BaseModel):
     qm_params: QMParams = Field(default=QMParams(), description="Quality metric parameters.")
-    metric_names: List[str] = Field(default=None, description="List of metric names to compute.")
+    metric_names: Optional[List[str]] = Field(default=None, description="List of metric names to compute. If None, all available metrics are computed.")
     n_jobs: int = Field(default=1, description="Number of jobs.")
 
 

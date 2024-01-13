@@ -6,7 +6,7 @@ import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
 from ..logger import logger
-from .params import PreprocessingParams
+from .params import PreprocessingParams, MCNonrigidAccurate, MCRigidFast, MCKilosortLike
 
 
 warnings.filterwarnings("ignore")
@@ -100,14 +100,27 @@ def preprocess(
         recording_processed = recording_processed.remove_channels(bad_channel_ids)
 
     # Motion correction
-    if preprocessing_params.motion_correction.compute:
+    if preprocessing_params.motion_correction.strategy != "skip":
         preset = preprocessing_params.motion_correction.preset
+        if preset == "nonrigid_accurate":
+            motion_correction_kwargs = MCNonrigidAccurate(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
+        elif preset == "rigid_fast":
+            motion_correction_kwargs = MCRigidFast(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
+        elif preset == "kilosort_like":
+            motion_correction_kwargs = MCKilosortLike(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
         logger.info(f"[Preprocessing] \tComputing motion correction with preset: {preset}")
         motion_folder = results_folder / "motion_correction"
         recording_corrected = spre.correct_motion(
-            recording_processed, preset=preset, folder=motion_folder, verbose=False
+            recording_processed,
+            preset=preset,
+            folder=motion_folder,
+            verbose=False,
+            detect_kwargs=motion_correction_kwargs.detect_kwargs.model_dump(),
+            localize_peaks_kwargs=motion_correction_kwargs.localize_peaks_kwargs.model_dump(),
+            estimate_motion_kwargs=motion_correction_kwargs.estimate_motion_kwargs.model_dump(),
+            interpolate_motion_kwargs=motion_correction_kwargs.interpolate_motion_kwargs.model_dump(),
         )
-        if preprocessing_params.motion_correction.apply:
+        if preprocessing_params.motion_correction.strategy == "apply":
             logger.info("[Preprocessing] \tApplying motion correction")
             recording_processed = recording_corrected
 
