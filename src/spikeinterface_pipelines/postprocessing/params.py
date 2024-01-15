@@ -97,7 +97,7 @@ class QMParams(BaseModel):
 class QualityMetrics(BaseModel):
     qm_params: QMParams = Field(default=QMParams(), description="Quality metric parameters.")
     metric_names: List[str] = Field(
-        default=["presence_ratio", "snr", "isi_violation", "rp_violation", "sliding_rp_violation", "amplitude_cutoff", "amplitude_median", "nearest_neighbor", "nn_isolation", "nn_noise_overlap"],
+        default=["presence_ratio", "snr", "isi_violation", "rp_violation", "sliding_rp_violation", "amplitude_cutoff", "amplitude_median"],
         description="List of metric names to compute. If None, all available metrics are computed."
     )
     n_jobs: int = Field(default=1, description="Number of jobs.")
