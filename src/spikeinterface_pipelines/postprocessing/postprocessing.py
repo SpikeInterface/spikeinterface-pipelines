@@ -101,7 +101,8 @@ def postprocess(
     logger.info("[Postprocessing] \tComputing quality metrics")
     _ = sqm.compute_quality_metrics(waveform_extractor, **postprocessing_params.quality_metrics.model_dump())
 
-    # cleanup
+    # Cleanup
+    logger.info("[Postprocessing] \tCleaning up")
     shutil.rmtree(tmp_folder)
 
     return waveform_extractor
