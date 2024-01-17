@@ -1,7 +1,7 @@
 
 from __future__ import annotations
-from cProfile import label
 from pathlib import Path
+from warnings import warn
 
 import numpy as np
 
@@ -60,6 +60,7 @@ def visualize(
     results_folder.mkdir(exist_ok=True, parents=True)
 
     if kcl.get_client_info() is None:
+        warn("Kachery client not found. Use `kachery-cloud-init` to initialize kachery client.")
         logger.info(
             "[Visualization] \tKachery client not found. Use `kachery-cloud-init` to initialize kachery client."
         )
