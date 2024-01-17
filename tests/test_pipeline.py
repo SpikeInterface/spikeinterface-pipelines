@@ -152,7 +152,7 @@ def test_visualization(tmp_path, generate_recording):
 
 
 @pytest.mark.skipif(not "kilosort2_5" in ss.installed_sorters(), reason="kilosort2_5 not installed")
-def test_pipeline(tmp_path, generate_recording, run_preprocessing, run_spikesorting, run_postprocessing, run_curation, run_visualization):
+def test_pipeline(tmp_path, generate_recording):
     recording, _, _ = generate_recording
     if "inter_sample_shift" in recording.get_property_keys():
         recording.delete_property("inter_sample_shift")

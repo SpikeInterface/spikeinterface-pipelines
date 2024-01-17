@@ -165,7 +165,7 @@ def visualize(
                     time_range = np.round(
                         np.array([t_start, t_start + recording_params["timeseries"]["snippet_duration_s"]]), 1
                     )
-                    w_traces = sw.plot_timeseries(
+                    w_traces = sw.plot_traces(
                         recording,
                         order_channel_by_depth=True,
                         time_range=time_range,
