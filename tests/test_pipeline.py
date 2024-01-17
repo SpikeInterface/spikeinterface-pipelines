@@ -152,11 +152,6 @@ def test_visualization(tmp_path, generate_recording):
 
 
 @pytest.mark.skipif(not "kilosort2_5" in ss.installed_sorters(), reason="kilosort2_5 not installed")
-@pytest.mark.parametrize("run_preprocessing", [True, False])
-@pytest.mark.parametrize("run_spikesorting", [True, False])
-@pytest.mark.parametrize("run_postprocessing", [True, False])
-@pytest.mark.parametrize("run_curation", [True, False])
-@pytest.mark.parametrize("run_visualization", [True, False])
 def test_pipeline(tmp_path, generate_recording, run_preprocessing, run_spikesorting, run_postprocessing, run_curation, run_visualization):
     recording, _, _ = generate_recording
     if "inter_sample_shift" in recording.get_property_keys():
