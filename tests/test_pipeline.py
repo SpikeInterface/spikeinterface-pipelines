@@ -4,21 +4,19 @@ import numpy as np
 from pathlib import Path
 
 import spikeinterface as si
-from spikeinterface.core import waveform_extractor
 import spikeinterface.sorters as ss
+import spikeinterface.postprocessing as spost
 import spikeinterface.qualitymetrics as sqm
 
-from spikeinterface_pipelines import pipeline
+from spikeinterface_pipelines import run_pipeline
 
-from spikeinterface_pipelines.preprocessing import preprocess
-from spikeinterface_pipelines.spikesorting import spikesort
-from spikeinterface_pipelines.postprocessing import postprocess
-from spikeinterface_pipelines.curation import curate
+from spikeinterface_pipelines.preprocessing import preprocess, PreprocessingParams
+from spikeinterface_pipelines.spikesorting import spikesort, SpikeSortingParams
+from spikeinterface_pipelines.postprocessing import postprocess, PostprocessingParams
+from spikeinterface_pipelines.curation import curate, CurationParams
+from spikeinterface_pipelines.visualization import visualize, VisualizationParams
 
-from spikeinterface_pipelines.preprocessing.params import PreprocessingParams
-from spikeinterface_pipelines.spikesorting.params import Kilosort25Model, SpikeSortingParams
-from spikeinterface_pipelines.postprocessing.params import PostprocessingParams
-from spikeinterface_pipelines.curation.params import CurationParams
+from spikeinterface_pipelines.spikesorting.params import Kilosort25Model
 
 
 def _generate_gt_recording():
@@ -27,6 +25,11 @@ def _generate_gt_recording():
     inter_sample_shifts = np.zeros(recording.get_num_channels())
     recording.set_property("inter_sample_shift", inter_sample_shifts)
     waveform_extractor = si.extract_waveforms(recording, sorting, mode="memory")
+    _ = spost.compute_spike_amplitudes(waveform_extractor)
+    _ = spost.compute_spike_locations(waveform_extractor, method="center_of_mass")
+    _ = spost.compute_correlograms(waveform_extractor)
+    _ = spost.compute_unit_locations(waveform_extractor)
+    _ = spost.compute_template_similarity(waveform_extractor)
     _ = sqm.compute_quality_metrics(waveform_extractor)
 
     return recording, sorting, waveform_extractor
@@ -95,7 +98,7 @@ def test_curation(tmp_path, generate_recording):
     _, _, waveform_extractor = generate_recording
 
     results_folder = Path(tmp_path) / "results_curation"
-    scratch_folder = Path(tmp_path) / "scratch_visualization"
+    scratch_folder = Path(tmp_path) / "scratch_curation"
 
     sorting_curated = curate(
         waveform_extractor=waveform_extractor,
@@ -116,8 +119,45 @@ def test_curation(tmp_path, generate_recording):
     assert sorting_curated is None
 
 
+def test_visualization(tmp_path, generate_recording):
+    recording, sorting, waveform_extractor = generate_recording
+
+    results_folder = Path(tmp_path) / "results_visualization"
+    scratch_folder = Path(tmp_path) / "scratch_visualization"
+
+    visualization_output = visualize(
+        recording=recording,
+        sorting_curated=sorting,
+        waveform_extractor=waveform_extractor,
+        visualization_params=VisualizationParams(),
+        results_folder=results_folder,
+        scratch_folder=scratch_folder,
+    )
+
+    assert isinstance(visualization_output, dict)
+    assert "recording" in visualization_output
+    assert "sorting_summary" in visualization_output
+
+    visualization_output = visualize(
+        recording=recording,
+        sorting_curated=None,
+        waveform_extractor=None,
+        visualization_params=VisualizationParams(),
+        results_folder=results_folder,
+        scratch_folder=scratch_folder,
+    )
+    assert isinstance(visualization_output, dict)
+    assert "recording" in visualization_output
+    assert "sorting_summary" not in visualization_output
+
+
 @pytest.mark.skipif(not "kilosort2_5" in ss.installed_sorters(), reason="kilosort2_5 not installed")
-def test_pipeline(tmp_path, generate_recording):
+@pytest.mark.parametrize("run_preprocessing", [True, False])
+@pytest.mark.parametrize("run_spikesorting", [True, False])
+@pytest.mark.parametrize("run_postprocessing", [True, False])
+@pytest.mark.parametrize("run_curation", [True, False])
+@pytest.mark.parametrize("run_visualization", [True, False])
+def test_pipeline(tmp_path, generate_recording, run_preprocessing, run_spikesorting, run_postprocessing, run_curation, run_visualization):
     recording, _, _ = generate_recording
     if "inter_sample_shift" in recording.get_property_keys():
         recording.delete_property("inter_sample_shift")
@@ -131,24 +171,35 @@ def test_pipeline(tmp_path, generate_recording):
         sorter_kwargs=ks25_params,
     )
 
-    recording_processed, sorting, waveform_extractor = pipeline.run_pipeline(
+    recording_processed, sorting, waveform_extractor, sorting_curated, vis_output = run_pipeline(
         recording=recording,
         results_folder=results_folder,
         scratch_folder=scratch_folder,
         spikesorting_params=spikesorting_params,
-    )
-
-    sorting_curated = curate(
-        waveform_extractor=waveform_extractor,
-        curation_params=CurationParams(),
-        results_folder=results_folder,
-        scratch_folder=scratch_folder,
+        run_preprocessing=run_preprocessing,
+        run_spikesorting=run_spikesorting,
+        run_postprocessing=run_postprocessing,
+        run_curation=run_curation,
+        run_visualization=run_visualization,
     )
 
     assert isinstance(recording_processed, si.BaseRecording)
-    assert isinstance(sorting, si.BaseSorting)
-    assert isinstance(waveform_extractor, si.WaveformExtractor)
-    assert isinstance(sorting_curated, si.BaseSorting)
+    if run_spikesorting:
+        assert isinstance(sorting, si.BaseSorting)
+    else:
+        assert sorting is None
+    if run_postprocessing:
+        assert isinstance(waveform_extractor, si.WaveformExtractor)
+    else:
+        assert waveform_extractor is None
+    if run_curation:
+        assert isinstance(sorting_curated, si.BaseSorting)
+    else:
+        assert sorting_curated is None
+    if run_visualization:
+        assert isinstance(vis_output, dict)
+    else:
+        assert vis_output is None
 
 
 if __name__ == "__main__":
@@ -159,14 +210,16 @@ if __name__ == "__main__":
 
     recording, sorting, waveform_extractor = _generate_gt_recording()
 
-    # print("TEST PREPROCESSING")
-    # test_preprocessing(tmp_folder, (recording, sorting))
-    # print("TEST SPIKESORTING")
-    # test_spikesorting(tmp_folder, (recording, sorting))
-    # print("TEST POSTPROCESSING")
-    # test_postprocessing(tmp_folder, (recording, sorting))
+    print("TEST PREPROCESSING")
+    test_preprocessing(tmp_folder, (recording, sorting))
+    print("TEST SPIKESORTING")
+    test_spikesorting(tmp_folder, (recording, sorting))
+    print("TEST POSTPROCESSING")
+    test_postprocessing(tmp_folder, (recording, sorting))
     print("TEST CURATION")
     test_curation(tmp_folder, (recording, sorting, waveform_extractor))
+    print("TEST VISUALIZATION")
+    test_visualization(tmp_folder, (recording, sorting, waveform_extractor))
 
-    # print("TEST PIPELINE")
-    # test_pipeline(tmp_folder, (recording, sorting))
+    print("TEST PIPELINE")
+    test_pipeline(tmp_folder, (recording, sorting))

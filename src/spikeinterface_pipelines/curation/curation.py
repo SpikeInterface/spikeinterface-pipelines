@@ -4,7 +4,7 @@ import re
 
 import numpy as np
 
-import spikeinterface.full as si
+import spikeinterface as si
 import spikeinterface.curation as sc
 
 from ..logger import logger
@@ -38,7 +38,7 @@ def curate(
         Curated sorting
     """
     # get quality metrics
-    if not waveform_extractor.has_extension("quality_metrics"):
+    if not waveform_extractor.is_extension("quality_metrics"):
         logger.info(f"[Curation] \tQuality metrics not found in WaveformExtractor.")
         return
 
