@@ -170,31 +170,14 @@ def test_pipeline(tmp_path, generate_recording):
         recording=recording,
         results_folder=results_folder,
         scratch_folder=scratch_folder,
-        spikesorting_params=spikesorting_params,
-        run_preprocessing=run_preprocessing,
-        run_spikesorting=run_spikesorting,
-        run_postprocessing=run_postprocessing,
-        run_curation=run_curation,
-        run_visualization=run_visualization,
+        spikesorting_params=spikesorting_params
     )
 
     assert isinstance(recording_processed, si.BaseRecording)
-    if run_spikesorting:
-        assert isinstance(sorting, si.BaseSorting)
-    else:
-        assert sorting is None
-    if run_postprocessing:
-        assert isinstance(waveform_extractor, si.WaveformExtractor)
-    else:
-        assert waveform_extractor is None
-    if run_curation:
-        assert isinstance(sorting_curated, si.BaseSorting)
-    else:
-        assert sorting_curated is None
-    if run_visualization:
-        assert isinstance(vis_output, dict)
-    else:
-        assert vis_output is None
+    assert isinstance(sorting, si.BaseSorting)
+    assert isinstance(waveform_extractor, si.WaveformExtractor)
+    assert isinstance(sorting_curated, si.BaseSorting)
+    assert isinstance(vis_output, dict)
 
 
 if __name__ == "__main__":
