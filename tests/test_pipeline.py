@@ -22,7 +22,7 @@ from spikeinterface_pipelines.curation.params import CurationParams
 
 
 def _generate_gt_recording():
-    recording, sorting = si.generate_ground_truth_recording(durations=[30], num_channels=64, seed=0)
+    recording, sorting = si.generate_ground_truth_recording(durations=[15], num_channels=128, seed=0)
     # add inter sample shift (but fake)
     inter_sample_shifts = np.zeros(recording.get_num_channels())
     recording.set_property("inter_sample_shift", inter_sample_shifts)
@@ -62,14 +62,40 @@ def test_spikesorting(tmp_path, generate_recording):
     results_folder = Path(tmp_path) / "results_spikesorting"
     scratch_folder = Path(tmp_path) / "scratch_spikesorting"
 
+    ks25_params = Kilosort25Model(do_correction=False)
+    spikesorting_params = SpikeSortingParams(
+        sorter_name="kilosort2_5",
+        sorter_kwargs=ks25_params,
+    )
+
     sorting = spikesort(
         recording=recording,
-        spikesorting_params=SpikeSortingParams(),
+        spikesorting_params=spikesorting_params,
         results_folder=results_folder,
         scratch_folder=scratch_folder,
     )
 
     assert isinstance(sorting, si.BaseSorting)
+
+    #  by group
+    num_channels = recording.get_num_channels()
+    groups = [0] * (num_channels // 2) + [1] * (num_channels // 2)
+    recording.set_channel_groups(groups)
+
+    spikesorting_params = SpikeSortingParams(
+        sorter_name="kilosort2_5",
+        sorter_kwargs=ks25_params,
+        spikesort_by_group=True,
+    )
+    sorting_group = spikesort(
+        recording=recording,
+        spikesorting_params=spikesorting_params,
+        results_folder=results_folder,
+        scratch_folder=scratch_folder,
+    )
+
+    assert isinstance(sorting_group, si.BaseSorting)
+    assert "group" in sorting_group.get_property_keys()
 
 
 def test_postprocessing(tmp_path, generate_recording):
@@ -160,13 +186,13 @@ if __name__ == "__main__":
     recording, sorting, waveform_extractor = _generate_gt_recording()
 
     # print("TEST PREPROCESSING")
-    # test_preprocessing(tmp_folder, (recording, sorting))
-    # print("TEST SPIKESORTING")
-    # test_spikesorting(tmp_folder, (recording, sorting))
+    # test_preprocessing(tmp_folder, (recording, sorting, waveform_extractor))
+    print("TEST SPIKESORTING")
+    test_spikesorting(tmp_folder, (recording, sorting, waveform_extractor))
     # print("TEST POSTPROCESSING")
-    # test_postprocessing(tmp_folder, (recording, sorting))
-    print("TEST CURATION")
-    test_curation(tmp_folder, (recording, sorting, waveform_extractor))
+    # test_postprocessing(tmp_folder, (recording, sorting, waveform_extractor))
+    # print("TEST CURATION")
+    # test_curation(tmp_folder, (recording, sorting, waveform_extractor))
 
     # print("TEST PIPELINE")
-    # test_pipeline(tmp_folder, (recording, sorting))
+    # test_pipeline(tmp_folder, (recording, sorting, waveform_extractor))

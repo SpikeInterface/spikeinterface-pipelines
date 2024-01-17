@@ -62,6 +62,7 @@ class MountainSort5Model(BaseModel):
 
 class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(default="kilosort2_5", description="Name of the sorter to use.")
+    spikesort_by_group: bool = Field(default=False, description="If True, spike sorting is run for each group separately.")
     sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, IronClustModel, MountainSort5Model] = Field(
         default=Kilosort25Model(), description="Sorter specific kwargs."
     )
