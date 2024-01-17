@@ -170,7 +170,7 @@ def test_pipeline(tmp_path, generate_recording):
         recording=recording,
         results_folder=results_folder,
         scratch_folder=scratch_folder,
-        spikesorting_params=spikesorting_params
+        spikesorting_params=spikesorting_params,
     )
 
     assert isinstance(recording_processed, si.BaseRecording)
