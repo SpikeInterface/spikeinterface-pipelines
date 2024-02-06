@@ -4,7 +4,7 @@ import re
 
 import numpy as np
 
-import spikeinterface.full as si
+import spikeinterface as si
 import spikeinterface.curation as sc
 
 from ..logger import logger
