@@ -75,7 +75,7 @@ def visualize(
     alpha = recording_params["drift"]["alpha"]
 
     # use spike locations
-    if waveform_extractor is not None and waveform_extractor.is_extension("spike_locations"):
+    if not waveform_extractor.has_extension("quality_metrics"):
         logger.info("[Visualization] \tVisualizing drift maps using pre-computed spike locations")
         peaks = waveform_extractor.sorting.to_spike_vector()
         peak_locations = waveform_extractor.load_extension("spike_locations").get_data()
