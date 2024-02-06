@@ -1,6 +1,6 @@
 [project]
 name = "spikeinterface_pipelines"
-version = "0.0.6"
+version = "0.0.8"
 description = "Collection of standardized analysis pipelines based on SpikeInterfacee."
 readme = "README.md"
 authors = [
@@ -9,7 +9,11 @@ authors = [
     { name = "Luiz Tauffer", email = "luiz.tauffer@catalystneuro.com" },
 ]
 requires-python = ">=3.8"
-dependencies = ["spikeinterface[full]", "neo>=0.12.0", "pydantic>=2.4.2"]
+dependencies = [
+    "spikeinterface[full,widgets]>=0.100.0",
+    "neo>=0.12.0",
+    "pydantic>=2.4.2",
+]
 keywords = [
     "spikeinterface",
     "spike sorting",
