@@ -74,14 +74,17 @@ def visualize(
     decimation_factor = recording_params["drift"]["decimation_factor"]
     alpha = recording_params["drift"]["alpha"]
 
-    # use spike locations
-    if not waveform_extractor.has_extension("quality_metrics"):
-        logger.info("[Visualization] \tVisualizing drift maps using pre-computed spike locations")
-        peaks = waveform_extractor.sorting.to_spike_vector()
-        peak_locations = waveform_extractor.load_extension("spike_locations").get_data()
-        peak_amps = np.concatenate(waveform_extractor.load_extension("spike_amplitudes").get_data())
+    # check if spike locations are available
+    spike_locations_available = False
+    if waveform_extractor is not None:
+        if waveform_extractor.has_extension("spike_locations"):
+            logger.info("[Visualization] \tVisualizing drift maps using pre-computed spike locations")
+            peaks = waveform_extractor.sorting.to_spike_vector()
+            peak_locations = waveform_extractor.load_extension("spike_locations").get_data()
+            peak_amps = np.concatenate(waveform_extractor.load_extension("spike_amplitudes").get_data())
+            spike_locations_available = True
     # otherwise detect peaks
-    else:
+    if not spike_locations_available:
         from spikeinterface.core.node_pipeline import ExtractDenseWaveforms, run_node_pipeline
         from spikeinterface.sortingcomponents.peak_detection import DetectPeakLocallyExclusive
         from spikeinterface.sortingcomponents.peak_localization import LocalizeCenterOfMass
