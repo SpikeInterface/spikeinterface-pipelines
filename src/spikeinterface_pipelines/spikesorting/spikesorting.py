@@ -40,7 +40,6 @@ def spikesort(
     try:
         logger.info(f"[Spikesorting] \tStarting {spikesorting_params.sorter_name} spike sorter")
 
-
         ## TEST ONLY - REMOVE LATER ##
         # si.get_default_sorter_params('kilosort2_5')
         # params_kilosort2_5 = {'do_correction': False}

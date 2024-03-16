@@ -6,10 +6,17 @@ import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
 from ..logger import logger
-from .params import PreprocessingParams, MCNonrigidAccurate, MCRigidFast, MCKilosortLike
+from .params import PreprocessingParams, MCNonrigidAccurate, MCNonrigidFastAndAccurate, MCRigidFast, MCKilosortLike
 
 
 warnings.filterwarnings("ignore")
+
+_motion_correction_presets_to_params = dict(
+    nonrigid_accurate=MCNonrigidAccurate,
+    nonrigid_fast_and_accurate=MCNonrigidFastAndAccurate,
+    rigid_fast=MCKilosortLike,
+    kilosort_like=MCKilosortLike,
+)
 
 
 def preprocess(
@@ -102,12 +109,9 @@ def preprocess(
     # Motion correction
     if preprocessing_params.motion_correction.strategy != "skip":
         preset = preprocessing_params.motion_correction.preset
-        if preset == "nonrigid_accurate":
-            motion_correction_kwargs = MCNonrigidAccurate(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
-        elif preset == "rigid_fast":
-            motion_correction_kwargs = MCRigidFast(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
-        elif preset == "kilosort_like":
-            motion_correction_kwargs = MCKilosortLike(**preprocessing_params.motion_correction.motion_kwargs.model_dump())
+        motion_correction_kwargs = _motion_correction_presets_to_params[preset](
+            **preprocessing_params.motion_correction.motion_kwargs.model_dump()
+        )
         logger.info(f"[Preprocessing] \tComputing motion correction with preset: {preset}")
         motion_folder = results_folder / "motion_correction"
         recording_corrected = spre.correct_motion(

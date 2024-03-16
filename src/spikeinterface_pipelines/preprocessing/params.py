@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Union, List, Literal
 from enum import Enum
+import numpy as np
 
 
 class PreprocessingStrategy(str, Enum):
@@ -52,7 +53,9 @@ class MCDetectKwargs(BaseModel):
 
 class MCLocalizeCenterOfMass(BaseModel):
     radius_um: float = Field(default=75.0, description="Radius in um for channel sparsity.")
-    feature: str = Field(default="ptp", description="'ptp', 'mean', 'energy' or 'peak_voltage'. Feature to consider for computation")
+    feature: str = Field(
+        default="ptp", description="'ptp', 'mean', 'energy' or 'peak_voltage'. Feature to consider for computation"
+    )
 
 
 class MCLocalizeMonopolarTriangulation(BaseModel):
@@ -60,17 +63,25 @@ class MCLocalizeMonopolarTriangulation(BaseModel):
     max_distance_um: float = Field(default=150.0, description="Boundary for distance estimation.")
     optimizer: str = Field(default="minimize_with_log_penality", description="")
     enforce_decrease: bool = Field(default=True, description="Enforce spatial decreasingness for PTP vectors")
-    feature: str = Field(default="ptp", description="'ptp', 'energy' or 'peak_voltage'. The available features to consider for estimating the position via monopolar triangulation are peak-to-peak amplitudes (ptp, default), energy ('energy', as L2 norm) or voltages at the center of the waveform (peak_voltage)")
+    feature: str = Field(
+        default="ptp",
+        description="'ptp', 'energy' or 'peak_voltage'. The available features to consider for estimating the position via monopolar triangulation are peak-to-peak amplitudes (ptp, default), energy ('energy', as L2 norm) or voltages at the center of the waveform (peak_voltage)",
+    )
 
 
 class MCLocalizeGridConvolution(BaseModel):
     radius_um: float = Field(default=40.0, description="Radius in um for channel sparsity.")
     upsampling_um: float = Field(default=5.0, description="Upsampling resolution for the grid of templates.")
-    sigma_um: List[float] = Field(default=[5.0, 25.0, 5], description="Spatial decays of the fake templates.")
+    weight_method: dict = Field(
+        default={"mode": "gaussian_2d", "sigma_list_um": np.linspace(5, 25, 5)}, description="Weighting strategy."
+    )
     sigma_ms: float = Field(default=0.25, description="The temporal decay of the fake templates.")
     margin_um: float = Field(default=30.0, description="The margin for the grid of fake templates.")
-    percentile: float = Field(default=10.0, description="The percentage in [0, 100] of the best scalar products kept to estimate the position.")
-    sparsity_threshold: float = Field(default=0.01, description="The sparsity threshold (in [0, 1]) below which weights should be considered as 0.")
+    percentile: float = Field(
+        default=10.0,
+        description="The percentage in [0, 100] of the best scalar products kept to estimate the position.",
+    )
+    prototype: Optional[list] = Field(default=None, description="Fake waveforms for the templates.")
 
 
 class MCEstimateMotionDecentralized(BaseModel):
@@ -117,45 +128,81 @@ class MCEstimateMotionIterativeTemplate(BaseModel):
 
 
 class MCInterpolateMotionKwargs(BaseModel):
-    direction: int = Field(default=1, description="0 | 1 | 2. Dimension along which channel_locations are shifted (0 - x, 1 - y, 2 - z).")
-    border_mode: str = Field(default="remove_channels", description="'remove_channels' | 'force_extrapolate' | 'force_zeros'. Control how channels are handled on border.")
-    spatial_interpolation_method: str = Field(default="idw", description="The spatial interpolation method used to interpolate the channel locations.")
+    direction: int = Field(
+        default=1, description="0 | 1 | 2. Dimension along which channel_locations are shifted (0 - x, 1 - y, 2 - z)."
+    )
+    border_mode: str = Field(
+        default="remove_channels",
+        description="'remove_channels' | 'force_extrapolate' | 'force_zeros'. Control how channels are handled on border.",
+    )
+    spatial_interpolation_method: str = Field(
+        default="idw", description="The spatial interpolation method used to interpolate the channel locations."
+    )
     sigma_um: float = Field(default=20.0, description="Used in the 'kriging' formula")
     p: int = Field(default=1, description="Used in the 'kriging' formula")
-    num_closest: int = Field(default=3, description="Number of closest channels used by 'idw' method for interpolation.")
+    num_closest: int = Field(
+        default=3, description="Number of closest channels used by 'idw' method for interpolation."
+    )
 
 
 class MCNonrigidAccurate(BaseModel):
     detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
-    localize_peaks_kwargs: MCLocalizeMonopolarTriangulation = Field(default=MCLocalizeMonopolarTriangulation(), description="")
-    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(default=MCEstimateMotionDecentralized(), description="")
+    localize_peaks_kwargs: MCLocalizeMonopolarTriangulation = Field(
+        default=MCLocalizeMonopolarTriangulation(), description=""
+    )
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDecentralized(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
+
+
+class MCNonrigidFastAndAccurate(BaseModel):
+    detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
+    localize_peaks_kwargs: MCLocalizeGridConvolution = Field(default=MCLocalizeGridConvolution(), description="")
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDecentralized(), description=""
+    )
     interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
 
 
 class MCRigidFast(BaseModel):
     detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
     localize_peaks_kwargs: MCLocalizeCenterOfMass = Field(default=MCLocalizeCenterOfMass(), description="")
-    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(default=MCEstimateMotionDecentralized(bin_duration_s=10.0, rigid=True), description="")
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDecentralized(bin_duration_s=10.0, rigid=True), description=""
+    )
     interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
 
 
 class MCKilosortLike(BaseModel):
     detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
     localize_peaks_kwargs: MCLocalizeGridConvolution = Field(default=MCLocalizeGridConvolution(), description="")
-    estimate_motion_kwargs: MCEstimateMotionIterativeTemplate = Field(default=MCEstimateMotionIterativeTemplate(), description="")
-    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(border_mode="force_extrapolate", spatial_interpolation_method="kriging"), description="")
+    estimate_motion_kwargs: MCEstimateMotionIterativeTemplate = Field(
+        default=MCEstimateMotionIterativeTemplate(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(
+        default=MCInterpolateMotionKwargs(border_mode="force_extrapolate", spatial_interpolation_method="kriging"),
+        description="",
+    )
 
 
 class MCPreset(str, Enum):
     nonrigid_accurate = "nonrigid_accurate"
+    nonrigid_fast_and_accurate = "nonrigid_fast_and_accurate"
     rigid_fast = "rigid_fast"
     kilosort_like = "kilosort_like"
 
 
 class MotionCorrection(BaseModel):
-    strategy: Literal["skip", "compute", "apply"] = Field(default="compute", description="What strategy to use for motion correction")
-    preset: MCPreset = Field(default=MCPreset.nonrigid_accurate.value, description="Preset for motion correction")
-    motion_kwargs: Union[MCNonrigidAccurate, MCRigidFast, MCKilosortLike] = Field(default=MCNonrigidAccurate(), description="Motion correction parameters")
+    strategy: Literal["skip", "compute", "apply"] = Field(
+        default="compute", description="What strategy to use for motion correction"
+    )
+    preset: MCPreset = Field(
+        default=MCPreset.nonrigid_fast_and_accurate.value, description="Preset for motion correction"
+    )
+    motion_kwargs: Union[MCNonrigidAccurate, MCNonrigidFastAndAccurate, MCRigidFast, MCKilosortLike] = Field(
+        default=MCNonrigidFastAndAccurate(), description="Motion correction parameters"
+    )
 
 
 # Preprocessing params ---------------------------------------------------------------

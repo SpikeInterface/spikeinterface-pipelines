@@ -28,7 +28,10 @@ class Kilosort25Model(BaseModel):
     sig: float = Field(default=20, description="spatial smoothness constant for registration")
     freq_min: float = Field(default=150, description="High-pass filter cutoff frequency")
     sigmaMask: float = Field(default=30, description="Spatial constant in um for computing residual variance of spike")
-    lam: float = Field(default=10.0, description="The importance of the amplitude penalty (like in Kilosort1: 0 means not used, 10 is average, 50 is a lot)")
+    lam: float = Field(
+        default=10.0,
+        description="The importance of the amplitude penalty (like in Kilosort1: 0 means not used, 10 is average, 50 is a lot)",
+    )
     nPCs: int = Field(default=3, description="Number of PCA dimensions")
     ntbuff: int = Field(default=64, description="Samples of symmetrical buffer for whitening and spike detection")
     nfilt_factor: int = Field(default=4, description="Max number of clusters per good channel (even temporary ones) 4")
@@ -62,7 +65,9 @@ class MountainSort5Model(BaseModel):
 
 class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(default="kilosort2_5", description="Name of the sorter to use.")
-    spikesort_by_group: bool = Field(default=False, description="If True, spike sorting is run for each group separately.")
+    spikesort_by_group: bool = Field(
+        default=False, description="If True, spike sorting is run for each group separately."
+    )
     sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, IronClustModel, MountainSort5Model] = Field(
         default=Kilosort25Model(), description="Sorter specific kwargs."
     )

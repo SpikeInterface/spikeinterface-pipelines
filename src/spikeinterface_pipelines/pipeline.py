@@ -82,6 +82,7 @@ def run_pipeline(
 
     # Spike Sorting
     if run_spikesorting:
+        # TODO: turn off sorter motion correction if motion correction is already done
         sorting = spikesort(
             recording=recording_preprocessed,
             scratch_folder=scratch_folder,
@@ -117,13 +118,12 @@ def run_pipeline(
         else:
             logger.info("Skipping postprocessing")
             waveform_extractor = None
-            
+
     else:
         logger.info("Skipping spike sorting")
         sorting = None
         waveform_extractor = None
         sorting_curated = None
-        
 
     # Visualization
     visualization_output = None
