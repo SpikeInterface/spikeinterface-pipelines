@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import re
 from typing import Tuple
 import spikeinterface as si
 
@@ -19,7 +18,7 @@ def run_pipeline(
     results_folder: Path | str = Path("./results/"),
     job_kwargs: JobKwargs | dict = JobKwargs(),
     preprocessing_params: PreprocessingParams | dict = PreprocessingParams(),
-    spikesorting_params: SpikeSortingParams | dict = SpikeSortingParams(),
+    spikesorting_params: SpikeSortingParams | dict = dict(),
     postprocessing_params: PostprocessingParams | dict = PostprocessingParams(),
     curation_params: CurationParams | dict = CurationParams(),
     visualization_params: VisualizationParams | dict = VisualizationParams(),
@@ -54,7 +53,10 @@ def run_pipeline(
     if isinstance(preprocessing_params, dict):
         preprocessing_params = PreprocessingParams(**preprocessing_params)
     if isinstance(spikesorting_params, dict):
-        spikesorting_params = SpikeSortingParams(**spikesorting_params)
+        spikesorting_params = SpikeSortingParams(
+            sorter_name=spikesorting_params['sorter_name'],
+            sorter_kwargs=spikesorting_params['sorter_kwargs']
+        )
     if isinstance(postprocessing_params, dict):
         postprocessing_params = PostprocessingParams(**postprocessing_params)
     if isinstance(curation_params, dict):
