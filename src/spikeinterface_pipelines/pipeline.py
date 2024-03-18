@@ -54,8 +54,7 @@ def run_pipeline(
         preprocessing_params = PreprocessingParams(**preprocessing_params)
     if isinstance(spikesorting_params, dict):
         spikesorting_params = SpikeSortingParams(
-            sorter_name=spikesorting_params['sorter_name'],
-            sorter_kwargs=spikesorting_params['sorter_kwargs']
+            sorter_name=spikesorting_params["sorter_name"], sorter_kwargs=spikesorting_params["sorter_kwargs"]
         )
     if isinstance(postprocessing_params, dict):
         postprocessing_params = PostprocessingParams(**postprocessing_params)
@@ -84,6 +83,7 @@ def run_pipeline(
 
     # Spike Sorting
     if run_spikesorting:
+        # TODO: turn off sorter motion correction if motion correction is already done
         sorting = spikesort(
             recording=recording_preprocessed,
             scratch_folder=scratch_folder,
@@ -125,7 +125,6 @@ def run_pipeline(
         sorting = None
         waveform_extractor = None
         sorting_curated = None
-
 
     # Visualization
     visualization_output = None

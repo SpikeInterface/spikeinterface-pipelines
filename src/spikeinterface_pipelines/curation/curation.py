@@ -31,7 +31,7 @@ def curate(
         Path to the scratch folder
     results_folder: Path
         Path to the results folder
-    
+
     Returns
     -------
     si.BaseSorting | None

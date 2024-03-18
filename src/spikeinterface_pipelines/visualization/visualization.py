@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -31,7 +30,7 @@ def visualize(
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/visualization/"),
 ) -> dict | None:
-    """ 
+    """
     Generate visualization of preprocessing, spikesorting and curation results.
 
     Parameters
@@ -52,7 +51,7 @@ def visualize(
     Returns
     -------
     visualization_output: dict
-        The visualization output dictionary    
+        The visualization output dictionary
     """
     logger.info("[Visualization] \tRunning Visualization stage")
     visualization_output = {}
@@ -68,9 +67,7 @@ def visualize(
 
     # Recording visualization
     cmap = plt.get_cmap(recording_params["drift"]["cmap"])
-    norm = Normalize(
-        vmin=recording_params["drift"]["vmin"], vmax=recording_params["drift"]["vmax"], clip=True
-    )
+    norm = Normalize(vmin=recording_params["drift"]["vmin"], vmax=recording_params["drift"]["vmax"], clip=True)
     decimation_factor = recording_params["drift"]["decimation_factor"]
     alpha = recording_params["drift"]["alpha"]
 
@@ -143,9 +140,7 @@ def visualize(
     fig_drift.savefig(fig_drift_folder / f"drift.png", dpi=300)
 
     # make a sorting view View
-    v_drift = svv.TabLayoutItem(
-        label=f"Drift map", view=svv.Image(image_path=str(fig_drift_folder / f"drift.png"))
-    )
+    v_drift = svv.TabLayoutItem(label=f"Drift map", view=svv.Image(image_path=str(fig_drift_folder / f"drift.png")))
 
     # timeseries
     if not recording_params["timeseries"]["skip"]:
@@ -212,8 +207,7 @@ def visualize(
         for prop in unit_table_properties:
             if prop not in waveform_extractor.sorting.get_property_keys():
                 logger.info(
-                    f"[Visualization] \tProperty {prop} not found in sorting object. "
-                    "Not adding to unit table"
+                    f"[Visualization] \tProperty {prop} not found in sorting object. " "Not adding to unit table"
                 )
                 unit_table_properties.remove(prop)
         v_sorting = sw.plot_sorting_summary(
@@ -222,14 +216,12 @@ def visualize(
             curation=sorting_summary_params["unit_table_properties"],
             label_choices=sorting_summary_params["label_choices"],
             backend="sortingview",
-            generate_url=False
+            generate_url=False,
         ).view
 
         try:
             # pre-generate gh for curation
-            url = v_sorting.url(
-                label=sorting_summary_params["label"]
-            )
+            url = v_sorting.url(label=sorting_summary_params["label"])
             print(f"\n{url}\n")
             visualization_output["sorting_summary"] = url
         except Exception as e:
