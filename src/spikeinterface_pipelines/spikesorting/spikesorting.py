@@ -37,12 +37,6 @@ def spikesort(
 
     try:
         logger.info(f"[Spikesorting] \tStarting {spikesorting_params.sorter_name} spike sorter")
-
-        ## TEST ONLY - REMOVE LATER ##
-        # si.get_default_sorter_params('kilosort2_5')
-        # params_kilosort2_5 = {'do_correction': False}
-        ## --------------------------##
-
         sorting = si.run_sorter(
             recording=recording,
             sorter_name=spikesorting_params.sorter_name,
@@ -51,7 +45,6 @@ def spikesort(
             delete_output_folder=True,
             remove_existing_folder=True,
             **spikesorting_params.sorter_kwargs.model_dump(),
-            # **params_kilosort2_5
         )
         logger.info(f"[Spikesorting] \tFound {len(sorting.unit_ids)} raw units")
         # remove spikes beyond num_Samples (if any)
