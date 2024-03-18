@@ -10,7 +10,7 @@ from .params import SpikeSortingParams
 
 def spikesort(
     recording: si.BaseRecording,
-    spikesorting_params: SpikeSortingParams = SpikeSortingParams(),
+    spikesorting_params: SpikeSortingParams,
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/spikesorting/"),
 ) -> si.BaseSorting | None:
