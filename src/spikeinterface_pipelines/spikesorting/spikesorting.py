@@ -12,7 +12,7 @@ from .params import SpikeSortingParams
 
 def spikesort(
     recording: si.BaseRecording,
-    spikesorting_params: SpikeSortingParams = SpikeSortingParams(),
+    spikesorting_params: SpikeSortingParams,
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/spikesorting/"),
 ) -> si.BaseSorting | None:
@@ -39,13 +39,6 @@ def spikesort(
 
     try:
         logger.info(f"[Spikesorting] \tStarting {spikesorting_params.sorter_name} spike sorter")
-
-
-        ## TEST ONLY - REMOVE LATER ##
-        # si.get_default_sorter_params('kilosort2_5')
-        # params_kilosort2_5 = {'do_correction': False}
-        ## --------------------------##
-
         if spikesorting_params.spikesort_by_group and len(np.unique(recording.get_channel_groups())) > 1:
             logger.info(f"[Spikesorting] \tSorting by channel groups")
             sorting = si.run_sorter_by_property(
