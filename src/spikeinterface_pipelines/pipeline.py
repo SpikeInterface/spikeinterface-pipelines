@@ -54,8 +54,7 @@ def run_pipeline(
         preprocessing_params = PreprocessingParams(**preprocessing_params)
     if isinstance(spikesorting_params, dict):
         spikesorting_params = SpikeSortingParams(
-            sorter_name=spikesorting_params['sorter_name'],
-            sorter_kwargs=spikesorting_params['sorter_kwargs']
+            sorter_name=spikesorting_params["sorter_name"], sorter_kwargs=spikesorting_params["sorter_kwargs"]
         )
     if isinstance(postprocessing_params, dict):
         postprocessing_params = PostprocessingParams(**postprocessing_params)
