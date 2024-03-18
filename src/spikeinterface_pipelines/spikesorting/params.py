@@ -93,3 +93,4 @@ class SpikeSortingParams(BaseModel):
         description="Sorter specific kwargs.",
         union_mode='left_to_right'
     )
+    spikesort_by_group: bool = Field(default=False, description="If True, spike sorting is run for each group separately.")

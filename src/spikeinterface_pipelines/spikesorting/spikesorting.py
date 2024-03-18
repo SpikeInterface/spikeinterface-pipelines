@@ -1,6 +1,8 @@
 from __future__ import annotations
-from pathlib import Path
 import shutil
+import numpy as np
+from pathlib import Path
+
 import spikeinterface.full as si
 import spikeinterface.curation as sc
 
@@ -37,15 +39,28 @@ def spikesort(
 
     try:
         logger.info(f"[Spikesorting] \tStarting {spikesorting_params.sorter_name} spike sorter")
-        sorting = si.run_sorter(
-            recording=recording,
-            sorter_name=spikesorting_params.sorter_name,
-            output_folder=str(output_folder),
-            verbose=True,
-            delete_output_folder=True,
-            remove_existing_folder=True,
-            **spikesorting_params.sorter_kwargs.model_dump(),
-        )
+        if spikesorting_params.spikesort_by_group and len(np.unique(recording.get_channel_groups())) > 1:
+            logger.info(f"[Spikesorting] \tSorting by channel groups")
+            sorting = si.run_sorter_by_property(
+                recording=recording,
+                sorter_name=spikesorting_params.sorter_name,
+                grouping_property="group",
+                working_folder=str(output_folder),
+                verbose=True,
+                delete_output_folder=True,
+                remove_existing_folder=True,
+                **spikesorting_params.sorter_kwargs.model_dump(),
+            )
+        else:
+            sorting = si.run_sorter(
+                recording=recording,
+                sorter_name=spikesorting_params.sorter_name,
+                output_folder=str(output_folder),
+                verbose=True,
+                delete_output_folder=True,
+                remove_existing_folder=True,
+                **spikesorting_params.sorter_kwargs.model_dump(),
+            )
         logger.info(f"[Spikesorting] \tFound {len(sorting.unit_ids)} raw units")
         # remove spikes beyond num_Samples (if any)
         sorting = sc.remove_excess_spikes(sorting=sorting, recording=recording)
@@ -55,8 +70,14 @@ def spikesort(
     except Exception as e:
         # save log to results
         results_folder.mkdir(exist_ok=True, parents=True)
-        if (output_folder).is_dir():
-            shutil.copy(output_folder / "spikeinterface_log.json", results_folder)
+        if not spikesorting_params.spikesort_by_group:
+            if (output_folder).is_dir():
+                shutil.copy(output_folder / "spikeinterface_log.json", results_folder)
+                shutil.rmtree(output_folder)
+        else:
+            for group_folder in output_folder.iterdir():
+                if group_folder.is_dir():
+                    shutil.copy(group_folder / "spikeinterface_log.json", results_folder / group_folder.name)
             shutil.rmtree(output_folder)
         logger.info(f"Spike sorting error:\n{e}")
         return None
