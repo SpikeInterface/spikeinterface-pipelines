@@ -13,7 +13,7 @@ from .spikesorting import (
     Kilosort3Model,
     IronClustModel,
     MountainSort5Model,
-    SpykingCircusModel,
+    SpykingCircus2Model,
 )
 from .postprocessing import postprocess, PostprocessingParams
 from .curation import curate, CurationParams
@@ -24,7 +24,7 @@ sorter_model_map = {
     "kilosort25": Kilosort25Model,
     "kilosort3": Kilosort3Model,
     "mountainsort5": MountainSort5Model,
-    "spykingcircus": SpykingCircusModel,
+    "spykingcircus2": SpykingCircus2Model,
     "ironclust": IronClustModel,
 }
 

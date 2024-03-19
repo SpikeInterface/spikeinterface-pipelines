@@ -5,5 +5,5 @@ from .params import (
     Kilosort3Model,
     IronClustModel,
     MountainSort5Model,
-    SpykingCircusModel
+   SpykingCircus2Model
 )
