@@ -4,10 +4,11 @@ from enum import Enum
 
 
 class SorterName(str, Enum):
-    ironclust = "ironclust"
     kilosort25 = "kilosort2_5"
     kilosort3 = "kilosort3"
     mountainsort5 = "mountainsort5"
+    spykingcircus = "spykingcircus"
+    ironclust = "ironclust"
 
 
 class Kilosort25Model(BaseModel):
@@ -57,11 +58,6 @@ class Kilosort3Model(BaseModel):
     pass
 
 
-class IronClustModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    pass
-
-
 class MountainSort5Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
     scheme: str = Field(default="2", description="Sorting scheme", json_schema_extra={"options": ["1", "2", "3"]})
@@ -90,9 +86,19 @@ class MountainSort5Model(BaseModel):
     whiten: bool = Field(default=True, description="Enable or disable whiten")
 
 
+class SpykingCircusModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pass
+
+
+class IronClustModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pass
+
+
 class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(description="Name of the sorter to use.")
-    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, IronClustModel, MountainSort5Model] = Field(
+    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, MountainSort5Model, SpykingCircusModel, IronClustModel] = Field(
         description="Sorter specific kwargs.", union_mode="left_to_right"
     )
     spikesort_by_group: bool = Field(
