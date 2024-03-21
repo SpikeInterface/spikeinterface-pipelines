@@ -13,7 +13,7 @@ from .spikesorting import (
     Kilosort3Model,
     IronClustModel,
     MountainSort5Model,
-    SpykingCircus2Model,
+    # SpykingCircus2Model,
 )
 from .postprocessing import postprocess, PostprocessingParams
 from .curation import curate, CurationParams
@@ -24,7 +24,7 @@ sorter_model_map = {
     "kilosort25": Kilosort25Model,
     "kilosort3": Kilosort3Model,
     "mountainsort5": MountainSort5Model,
-    "spykingcircus2": SpykingCircus2Model,
+    # "spykingcircus2": SpykingCircus2Model,
     "ironclust": IronClustModel,
 }
 
@@ -72,6 +72,8 @@ def run_pipeline(
     if isinstance(spikesorting_params, dict):
         if spikesorting_params["sorter_name"] not in sorter_model_map:
             raise ValueError(f"Sorter name {spikesorting_params['sorter_name']} not recognized")
+        if spikesorting_params["sorter_name"] == "mountainsort5":
+            spikesorting_params["sorter_kwargs"]["n_jobs_for_preprocessing"] = job_kwargs.n_jobs
         spikesorting_params = SpikeSortingParams(
             sorter_name=spikesorting_params["sorter_name"],
             sorter_kwargs=sorter_model_map[spikesorting_params["sorter_name"]](**spikesorting_params["sorter_kwargs"]),

@@ -7,7 +7,7 @@ class SorterName(str, Enum):
     kilosort25 = "kilosort2_5"
     kilosort3 = "kilosort3"
     mountainsort5 = "mountainsort5"
-    spykingcircus2 = "spykingcircus2"
+    # spykingcircus2 = "spykingcircus2"
     ironclust = "ironclust"
 
 
@@ -84,60 +84,62 @@ class MountainSort5Model(BaseModel):
     freq_max: int = Field(default=6000, description="Low-pass filter cutoff frequency")
     filter: bool = Field(default=True, description="Enable or disable filter")
     whiten: bool = Field(default=True, description="Enable or disable whiten")
+    n_jobs_for_preprocessing: float = Field(default=0.8, description="Number of jobs for preprocessing")
 
 
-class SpykingCircus2GeneralModel(BaseModel):
-    ms_before: int = Field(default=2, description="ms before")
-    ms_after: int = Field(default=2, description="ms after")
-    radius_um: int = Field(default=100, description="radius um")
+## SpykingCircus2 - WIP
+# class SpykingCircus2GeneralModel(BaseModel):
+#     ms_before: int = Field(default=2, description="ms before")
+#     ms_after: int = Field(default=2, description="ms after")
+#     radius_um: int = Field(default=100, description="radius um")
 
 
-class SpykingCircus2WaveformsModel(BaseModel):
-    max_spikes_per_unit: int = Field(default=200, description="Max spikes per unit")
-    overwrite: bool = Field(default=True, description="Overwrite")
-    sparse: bool = Field(default=True, description="Sparse")
-    method: str = Field(default="energy", description="Method")
-    threshold: float = Field(default=0.25, description="Threshold")
+# class SpykingCircus2WaveformsModel(BaseModel):
+#     max_spikes_per_unit: int = Field(default=200, description="Max spikes per unit")
+#     overwrite: bool = Field(default=True, description="Overwrite")
+#     sparse: bool = Field(default=True, description="Sparse")
+#     method: str = Field(default="energy", description="Method")
+#     threshold: float = Field(default=0.25, description="Threshold")
 
 
-class SpykingCircus2FilteringModel(BaseModel):
-    freq_min: int = Field(default=150, description="High-pass filter cutoff frequency")
-    dtype: str = Field(default="float32", description="Data type")
+# class SpykingCircus2FilteringModel(BaseModel):
+#     freq_min: int = Field(default=150, description="High-pass filter cutoff frequency")
+#     dtype: str = Field(default="float32", description="Data type")
 
 
-class SpykingCircus2DetectionModel(BaseModel):
-    peak_sign: str = Field(default="neg", description="Peak sign")
-    detect_threshold: int = Field(default=4, description="Detect threshold")
+# class SpykingCircus2DetectionModel(BaseModel):
+#     peak_sign: str = Field(default="neg", description="Peak sign")
+#     detect_threshold: int = Field(default=4, description="Detect threshold")
 
 
-class SpykingCircus2SelectionModel(BaseModel):
-    method: str = Field(default="smart_sampling_amplitudes", description="Method")
-    n_peaks_per_channel: int = Field(default=5000, description="Number of peaks per channel")
-    min_n_peaks: int = Field(default=20000, description="Minimum number of peaks")
-    select_per_channel: bool = Field(default=False, description="Select per channel")
+# class SpykingCircus2SelectionModel(BaseModel):
+#     method: str = Field(default="smart_sampling_amplitudes", description="Method")
+#     n_peaks_per_channel: int = Field(default=5000, description="Number of peaks per channel")
+#     min_n_peaks: int = Field(default=20000, description="Minimum number of peaks")
+#     select_per_channel: bool = Field(default=False, description="Select per channel")
 
 
-class SpykingCircus2ClusteringModel(BaseModel):
-    legacy: bool = Field(default=False, description="Legacy")
+# class SpykingCircus2ClusteringModel(BaseModel):
+#     legacy: bool = Field(default=False, description="Legacy")
 
 
-class SpykingCircus2CacheModel(BaseModel):
-    mode: str = Field(default="memory", description="Mode")
-    memory_limit: float = Field(default=0.5, description="Memory limit")
-    delete_cache: bool = Field(default=True, description="Delete cache")
+# class SpykingCircus2CacheModel(BaseModel):
+#     mode: str = Field(default="memory", description="Mode")
+#     memory_limit: float = Field(default=0.5, description="Memory limit")
+#     delete_cache: bool = Field(default=True, description="Delete cache")
 
 
-class SpykingCircus2Model(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    general: SpykingCircus2GeneralModel = Field(default=SpykingCircus2GeneralModel(), description="General parameters")
-    waveforms: SpykingCircus2WaveformsModel = Field(default=SpykingCircus2WaveformsModel(), description="Waveforms parameters")
-    filtering: SpykingCircus2FilteringModel = Field(default=SpykingCircus2FilteringModel(), description="Filtering parameters")
-    detection: SpykingCircus2DetectionModel = Field(default=SpykingCircus2DetectionModel(), description="Detection parameters")
-    selection: SpykingCircus2SelectionModel = Field(default=SpykingCircus2SelectionModel(), description="Selection parameters")
-    clustering: SpykingCircus2ClusteringModel = Field(default=SpykingCircus2ClusteringModel(), description="Clustering parameters")
-    apply_preprocessing: bool = Field(default=True, description="Apply preprocessing")
-    shared_memory: bool = Field(default=True, description="Shared memory")
-    cache_preprocessing: SpykingCircus2CacheModel = Field(default=SpykingCircus2CacheModel(), description="Cache preprocessing")
+# class SpykingCircus2Model(BaseModel):
+#     model_config = ConfigDict(extra="forbid")
+#     general: SpykingCircus2GeneralModel = Field(default=SpykingCircus2GeneralModel(), description="General parameters")
+#     waveforms: SpykingCircus2WaveformsModel = Field(default=SpykingCircus2WaveformsModel(), description="Waveforms parameters")
+#     filtering: SpykingCircus2FilteringModel = Field(default=SpykingCircus2FilteringModel(), description="Filtering parameters")
+#     detection: SpykingCircus2DetectionModel = Field(default=SpykingCircus2DetectionModel(), description="Detection parameters")
+#     selection: SpykingCircus2SelectionModel = Field(default=SpykingCircus2SelectionModel(), description="Selection parameters")
+#     clustering: SpykingCircus2ClusteringModel = Field(default=SpykingCircus2ClusteringModel(), description="Clustering parameters")
+#     apply_preprocessing: bool = Field(default=True, description="Apply preprocessing")
+#     shared_memory: bool = Field(default=True, description="Shared memory")
+#     cache_preprocessing: SpykingCircus2CacheModel = Field(default=SpykingCircus2CacheModel(), description="Cache preprocessing")
 
 
 class IronClustModel(BaseModel):
@@ -147,7 +149,7 @@ class IronClustModel(BaseModel):
 
 class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(description="Name of the sorter to use.")
-    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, MountainSort5Model, SpykingCircus2Model, IronClustModel] = Field(
+    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, MountainSort5Model, IronClustModel] = Field(
         description="Sorter specific kwargs.", union_mode="left_to_right"
     )
     spikesort_by_group: bool = Field(
