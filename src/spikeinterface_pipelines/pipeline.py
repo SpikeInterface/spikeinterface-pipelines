@@ -138,6 +138,19 @@ def run_pipeline(
                 )
             else:
                 logger.info("Skipping curation")
+
+            # Visualization
+            visualization_output = None
+            if run_visualization:
+                logger.info("Visualizing results")
+                visualization_output = visualize(
+                    recording=recording_preprocessed,
+                    sorting_curated=sorting_curated,
+                    waveform_extractor=waveform_extractor,
+                    visualization_params=visualization_params,
+                    scratch_folder=scratch_folder,
+                    results_folder=results_folder_visualization,
+                )
         else:
             logger.info("Skipping postprocessing")
             waveform_extractor = None
@@ -147,18 +160,5 @@ def run_pipeline(
         sorting = None
         waveform_extractor = None
         sorting_curated = None
-
-    # Visualization
-    visualization_output = None
-    if run_visualization:
-        logger.info("Visualizing results")
-        visualization_output = visualize(
-            recording=recording_preprocessed,
-            sorting_curated=sorting_curated,
-            waveform_extractor=waveform_extractor,
-            visualization_params=visualization_params,
-            scratch_folder=scratch_folder,
-            results_folder=results_folder_visualization,
-        )
 
     return (recording_preprocessed, sorting, waveform_extractor, sorting_curated, visualization_output)
