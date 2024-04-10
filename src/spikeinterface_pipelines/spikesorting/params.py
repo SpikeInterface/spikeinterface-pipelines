@@ -84,7 +84,6 @@ class MountainSort5Model(BaseModel):
     freq_max: int = Field(default=6000, description="Low-pass filter cutoff frequency")
     filter: bool = Field(default=True, description="Enable or disable filter")
     whiten: bool = Field(default=True, description="Enable or disable whiten")
-    n_jobs_for_preprocessing: float = Field(default=0.8, description="Number of jobs for preprocessing")
 
 
 ## SpykingCircus2 - WIP
