@@ -98,6 +98,7 @@ class QualityMetrics(BaseModel):
     qm_params: QMParams = Field(default=QMParams(), description="Quality metric parameters.")
     metric_names: List[str] = Field(
         default=[
+            "firing_rate",
             "presence_ratio",
             "snr",
             "isi_violation",
