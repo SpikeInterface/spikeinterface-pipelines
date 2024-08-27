@@ -61,7 +61,7 @@ def visualize(
         logger.info(
             "[Visualization] \tKachery client not found. Use `kachery-cloud-init` to initialize kachery client."
         )
-        return
+        # return
     visualization_params_dict = visualization_params.model_dump()
     recording_params = visualization_params_dict["recording"]
 
@@ -80,6 +80,7 @@ def visualize(
             peak_locations = waveform_extractor.load_extension("spike_locations").get_data()
             peak_amps = np.concatenate(waveform_extractor.load_extension("spike_amplitudes").get_data())
             spike_locations_available = True
+
     # otherwise detect peaks
     if not spike_locations_available:
         from spikeinterface.core.node_pipeline import ExtractDenseWaveforms, run_node_pipeline
@@ -207,7 +208,7 @@ def visualize(
         for prop in unit_table_properties:
             if prop not in waveform_extractor.sorting.get_property_keys():
                 logger.info(
-                    f"[Visualization] \tProperty {prop} not found in sorting object. " "Not adding to unit table"
+                    f"[Visualization] \tProperty {prop} not found in sorting object. Not adding to unit table"
                 )
                 unit_table_properties.remove(prop)
         v_sorting = sw.plot_sorting_summary(
@@ -225,7 +226,7 @@ def visualize(
             print(f"\n{url}\n")
             visualization_output["sorting_summary"] = url
         except Exception as e:
-            logger.info("[Visualization] \tSortingview visualization failed with error:\n{e}")
+            logger.info(f"[Visualization] \tSortingview visualization failed with error:\n{e}")
     else:
         logger.info("[Visualization] \tNo units to visualize")
 

@@ -47,7 +47,12 @@ def postprocess(
     # first extract some raw waveforms in memory to deduplicate based on peak alignment
     wf_dedup_folder = tmp_folder / "waveforms_dense"
     waveform_extractor_raw = si.extract_waveforms(
-        recording, sorting, folder=wf_dedup_folder, sparse=False, **postprocessing_params.waveforms_raw.model_dump()
+        recording,
+        sorting,
+        folder=wf_dedup_folder,
+        sparse=False,
+        overwrite=True,
+        **postprocessing_params.waveforms_raw.model_dump()
     )
 
     # de-duplication
@@ -66,7 +71,10 @@ def postprocess(
 
     # this is a trick to make the postprocessed folder "self-contained
     sorting_folder = results_folder / "sorting"
-    sorting_deduplicated = sorting_deduplicated.save(folder=sorting_folder)
+    sorting_deduplicated = sorting_deduplicated.save(
+        folder=sorting_folder,
+        overwrite=True,
+    )
 
     # now extract waveforms on de-duplicated units
     logger.info("[Postprocessing] \tSaving sparse de-duplicated waveform extractor folder")

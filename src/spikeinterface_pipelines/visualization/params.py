@@ -1,8 +1,5 @@
-from cProfile import label
 from pydantic import BaseModel, Field
 from typing import Literal, Union
-
-from spikeinterface.widgets import sorting_summary
 
 
 class TracesParams(BaseModel):
