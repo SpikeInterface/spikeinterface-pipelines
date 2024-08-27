@@ -20,7 +20,7 @@ def postprocess(
     postprocessing_params: PostprocessingParams = PostprocessingParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/postprocessing/"),
-) -> si.WaveformExtractor:
+) -> si.SortingAnalyzer:
     """
     Postprocess preprocessed and spike sorting output
 
@@ -37,7 +37,7 @@ def postprocess(
 
     Returns
     -------
-    si.WaveformExtractor
+    si.SortingAnalyzer
         The waveform extractor
     """
 

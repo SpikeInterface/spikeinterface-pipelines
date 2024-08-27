@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 from pathlib import Path
 import re
 
@@ -12,7 +12,7 @@ from .params import CurationParams
 
 
 def curate(
-    waveform_extractor: si.WaveformExtractor,
+    waveform_extractor: si.SortingAnalyzer,
     curation_params: CurationParams = CurationParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/curation/"),
@@ -23,7 +23,7 @@ def curate(
 
     Parameters
     ----------
-    waveform_extractor: si.WaveformExtractor
+    waveform_extractor: si.SortingAnalyzer
         The input waveform extractor
     curation_params: CurationParams
         Curation parameters
@@ -39,7 +39,7 @@ def curate(
     """
     # get quality metrics
     if not waveform_extractor.has_extension("quality_metrics"):
-        logger.info(f"[Curation] \tQuality metrics not found in WaveformExtractor.")
+        logger.info(f"[Curation] \tQuality metrics not found in SortingAnalyzer.")
         return
 
     qm = waveform_extractor.load_extension("quality_metrics").get_data()

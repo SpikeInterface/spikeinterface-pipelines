@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 from pathlib import Path
 from typing import Tuple
 import spikeinterface as si
@@ -47,7 +47,7 @@ def run_pipeline(
 ) -> Tuple[
     si.BaseRecording | None,
     si.BaseSorting | None,
-    si.WaveformExtractor | None,
+    si.SortingAnalyzer | None,
     si.BaseSorting | None,
     dict | None,
 ]:

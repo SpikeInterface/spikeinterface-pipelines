@@ -6,9 +6,10 @@ from enum import Enum
 class SorterName(str, Enum):
     kilosort25 = "kilosort2_5"
     kilosort3 = "kilosort3"
+    kilosort4 = "kilosort4"
     mountainsort5 = "mountainsort5"
-    # spykingcircus2 = "spykingcircus2"
     ironclust = "ironclust"
+    # spykingcircus2 = "spykingcircus2"
 
 
 class Kilosort25Model(BaseModel):
@@ -57,6 +58,9 @@ class Kilosort3Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
     pass
 
+class Kilosort4Model(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pass
 
 class MountainSort5Model(BaseModel):
     model_config = ConfigDict(extra="forbid")

@@ -9,10 +9,18 @@ class PreprocessingStrategy(str, Enum):
     destripe = "destripe"
 
 
+class FilterType(str, Enum):
+    highpass = "highpass"
+    bandpass = "bandpass"
+
 class HighpassFilter(BaseModel):
     freq_min: float = Field(default=300.0, description="Minimum frequency for the highpass filter")
     margin_ms: float = Field(default=5.0, description="Margin in milliseconds")
 
+class BandpassFilter(BaseModel):
+    freq_min: float = Field(default=300.0, description="Minimum frequency for the highpass filter")
+    freq_max: float = Field(default=6000.0, description="Maximum frequency for the highpass filter")
+    margin_ms: float = Field(default=5.0, description="Margin in milliseconds")
 
 class PhaseShift(BaseModel):
     margin_ms: float = Field(default=100.0, description="Margin in milliseconds for phase shift")
@@ -145,11 +153,21 @@ class MCInterpolateMotionKwargs(BaseModel):
     )
 
 
+# TODO: add dredge and use dredge_Fast as default
 class MCNonrigidAccurate(BaseModel):
     detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
     localize_peaks_kwargs: MCLocalizeMonopolarTriangulation = Field(
         default=MCLocalizeMonopolarTriangulation(), description=""
     )
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDecentralized(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
+
+
+class MCNonrigidFastAndAccurate(BaseModel):
+    detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
+    localize_peaks_kwargs: MCLocalizeGridConvolution = Field(default=MCLocalizeGridConvolution(), description="")
     estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
         default=MCEstimateMotionDecentralized(), description=""
     )
@@ -208,7 +226,9 @@ class MotionCorrection(BaseModel):
 # Preprocessing params ---------------------------------------------------------------
 class PreprocessingParams(BaseModel):
     preprocessing_strategy: PreprocessingStrategy = Field(default="cmr", description="Strategy for preprocessing")
+    filter_type: FilterType = Field(default="highpass", description="Type of filter")
     highpass_filter: HighpassFilter = Field(default=HighpassFilter(), description="Highpass filter")
+    bandpass_filter: BandpassFilter = Field(default=BandpassFilter(), description="Bandpass filter")
     phase_shift: PhaseShift = Field(default=PhaseShift(), description="Phase shift")
     common_reference: CommonReference = Field(default=CommonReference(), description="Common reference")
     highpass_spatial_filter: HighpassSpatialFilter = Field(

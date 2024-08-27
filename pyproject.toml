@@ -8,10 +8,10 @@ authors = [
     { name = "Jeremy Magland", email = "jmagland@flatironinstitute.org" },
     { name = "Luiz Tauffer", email = "luiz.tauffer@catalystneuro.com" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
-    "spikeinterface[full,widgets]>=0.100.0",
-    "neo>=0.12.0",
+    "spikeinterface[full,widgets]>=0.101.0",
+    "neo>=0.13.0",
     "pydantic>=2.4.2",
     "sortingview>=0.13.1",
     "kachery_cloud>=0.4.7",

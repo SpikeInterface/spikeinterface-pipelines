@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from pathlib import Path
 import numpy as np
@@ -25,7 +25,7 @@ matplotlib.use("agg")
 def visualize(
     recording: si.BaseRecording,
     sorting_curated: si.BaseSorting | None = None,
-    waveform_extractor: si.WaveformExtractor | None = None,
+    waveform_extractor: si.SortingAnalyzer | None = None,
     visualization_params: VisualizationParams = VisualizationParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/visualization/"),
@@ -39,7 +39,7 @@ def visualize(
         The input processed recording
     sorting_curated: si.BaseSorting | None
         The input curated sorting. If None, only the recording visualization will be generated.
-    waveform_extractor: si.WaveformExtractor | None
+    waveform_extractor: si.SortingAnalyzer | None
         The input waveform extractor from postprocessing. If None, only the recording visualization will be generated.
     visualization_params: VisualizationParams
         The visualization parameters
