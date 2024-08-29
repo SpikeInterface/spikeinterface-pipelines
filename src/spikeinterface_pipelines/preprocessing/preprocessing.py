@@ -6,12 +6,22 @@ import spikeinterface as si
 import spikeinterface.preprocessing as spre
 
 from ..logger import logger
-from .params import PreprocessingParams, MCNonrigidAccurate, MCNonrigidFastAndAccurate, MCRigidFast, MCKilosortLike
+from .params import (
+    PreprocessingParams,
+    MCDredge,
+    MCDredgeFast,
+    MCNonrigidAccurate,
+    MCNonrigidFastAndAccurate,
+    MCRigidFast,
+    MCKilosortLike
+)
 
 
 warnings.filterwarnings("ignore")
 
 _motion_correction_presets_to_params = dict(
+    dredge=MCDredge,
+    dredge_fast=MCDredgeFast,
     nonrigid_accurate=MCNonrigidAccurate,
     nonrigid_fast_and_accurate=MCNonrigidFastAndAccurate,
     rigid_fast=MCKilosortLike,
@@ -142,7 +152,6 @@ def preprocess(
             recording_processed_c,
             preset=preset,
             folder=motion_folder,
-            verbose=False,
             detect_kwargs=motion_correction_kwargs.detect_kwargs.model_dump(),
             localize_peaks_kwargs=motion_correction_kwargs.localize_peaks_kwargs.model_dump(),
             estimate_motion_kwargs=motion_correction_kwargs.estimate_motion_kwargs.model_dump(),

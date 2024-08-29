@@ -45,7 +45,7 @@ def spikesort(
                 recording=recording,
                 sorter_name=spikesorting_params.sorter_name,
                 grouping_property="group",
-                working_folder=str(output_folder),
+                folder=str(output_folder),
                 verbose=True,
                 delete_output_folder=True,
                 remove_existing_folder=True,
@@ -55,7 +55,7 @@ def spikesort(
             sorting = si.run_sorter(
                 recording=recording,
                 sorter_name=spikesorting_params.sorter_name,
-                output_folder=str(output_folder),
+                folder=str(output_folder),
                 verbose=True,
                 delete_output_folder=True,
                 remove_existing_folder=True,
