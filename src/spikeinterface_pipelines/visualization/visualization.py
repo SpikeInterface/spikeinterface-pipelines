@@ -57,11 +57,15 @@ def visualize(
     visualization_output = {}
     results_folder.mkdir(exist_ok=True, parents=True)
 
-    if kcl.get_client_info() is None:
+    kcl_client = None
+    try:
+        kcl_client = kcl.get_client_info()
+    except:
+        pass
+    if kcl_client is None:
         logger.info(
             "[Visualization] \tKachery client not found. Use `kachery-cloud-init` to initialize kachery client."
         )
-        # return
     visualization_params_dict = visualization_params.model_dump()
     recording_params = visualization_params_dict["recording"]
 
@@ -85,17 +89,17 @@ def visualize(
 
         logger.info("[Visualization] \tVisualizing drift maps using detected peaks (no spike sorting available)")
         # locally_exclusive + pipeline steps LocalizeCenterOfMass + PeakToPeakFeature
-        peak_detector_node = DetectPeakLocallyExclusive(recording, **visualization_params["drift"]["detection"])
+        peak_detector_node = DetectPeakLocallyExclusive(recording, **drift_params["detection"])
         extract_dense_waveforms_node = ExtractDenseWaveforms(
             recording,
-            ms_before=visualization_params["drift"]["localization"]["ms_before"],
-            ms_after=visualization_params["drift"]["localization"]["ms_after"],
+            ms_before=drift_params["localization"]["ms_before"],
+            ms_after=drift_params["localization"]["ms_after"],
             parents=[peak_detector_node],
             return_output=False,
         )
         localize_peaks_node = LocalizeCenterOfMass(
             recording,
-            radius_um=visualization_params["drift"]["localization"]["radius_um"],
+            radius_um=drift_params["localization"]["radius_um"],
             parents=[peak_detector_node, extract_dense_waveforms_node],
         )
         pipeline_nodes = [peak_detector_node, extract_dense_waveforms_node, localize_peaks_node]
@@ -110,7 +114,7 @@ def visualize(
 
     if not skip_drift:
         fig_drift, axs_drift = plt.subplots(
-            ncols=recording.get_num_segments(), figsize=visualization_params["drift"]["figsize"]
+            ncols=recording.get_num_segments(), figsize=drift_params["figsize"]
         )
         y_locs = recording.get_channel_locations()[:, 1]
         depth_lim = [np.min(y_locs), np.max(y_locs)]
@@ -121,7 +125,7 @@ def visualize(
             else:
                 ax_drift = axs_drift[segment_index]
             if spike_locations_available:
-                sorting_analyzer_to_plot = analyzer
+                sorting_analyzer_to_plot = sorting_analyzer
                 peaks_to_plot = None
                 peak_locations_to_plot = None
                 sampling_frequency = None

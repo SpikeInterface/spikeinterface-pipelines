@@ -32,6 +32,7 @@ jobs:
           python -m pip install -U pip  # Official recommended way
           pip install pytest
           pip install pyvips
+          pip install kilosort==4.0.12
           pip install -e .
       - name: Test pipeline with pytest
         run: |

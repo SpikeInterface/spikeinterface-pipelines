@@ -62,8 +62,8 @@ class SortingSummaryVisualizationParams(BaseModel):
     """
 
     unit_table_properties: list = Field(
-        default=["firing_rate", "amplitude_median", "default_qc"], description="List of properties to show in the unit table."
-    )
+        default=[], description="List of properties to show in the unit table."
+    ) #default=["firing_rate", "amplitude_median", "default_qc"]
     curation: bool = Field(default=True, description="Whether to show curation buttons.")
     label_choices: list = Field(
         default=["SUA", "MUA", "noise"], description="List of labels to choose from (if `curation=True`)"

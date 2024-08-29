@@ -236,5 +236,5 @@ if __name__ == "__main__":
     print("TEST VISUALIZATION")
     test_visualization(tmp_folder, (recording, sorting, sorting_analyzer))
 
-    # print("TEST PIPELINE")
-    # test_pipeline(tmp_folder, (recording, sorting, sorting_analyzer))
+    print("TEST PIPELINE")
+    test_pipeline(tmp_folder, (recording, sorting, sorting_analyzer))
