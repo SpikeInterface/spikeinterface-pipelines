@@ -32,6 +32,7 @@ def _generate_gt_recording():
     analyzer.compute(
         [
             "random_spikes",
+            "waveforms",
             "templates",
             "noise_levels",
             "spike_amplitudes",

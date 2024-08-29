@@ -129,9 +129,10 @@ class Kilosort4Model(BaseModel):
     save_extra_kwargs: bool = Field(default=False, description="If True, additional kwargs are saved to the output")
     skip_kilosort_preprocessing: bool = Field(default=False, description="Can optionally skip the internal kilosort preprocessing")
     scaleproc: Union[None, int] = Field(default=None, description="int16 scaling of whitened data, if None set to 200.")
-    save_preprocessed_copy: bool = Field(default=False, description="save a pre-processed copy of the data (including drift correction) to temp_wh.dat in the results directory and format Phy output to use that copy of the data")
     torch_device: str = Field(default="auto", description="Select the torch device auto/cuda/cpu")
-    # bad_channels: Optional[List[int]] = Field(default=None, description="List of bad channels to exclude from spike detection and clustering.")
+    # THESE 2 PARAMS REUQIRE A NEW RELEASE OD SPIKEINTERFACE
+    # ist[int]] = Field(default=None, description="List of bad channels to exclude from spike detection and clustering.")
+    # save_preprocessed_copy: bool = Field(default=False, description="save a pre-processed copy of the data (including drift correction) to temp_wh.dat in the results directory and format Phy output to use that copy of the data")
 
 
 
