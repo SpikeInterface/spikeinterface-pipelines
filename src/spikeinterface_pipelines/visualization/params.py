@@ -45,9 +45,9 @@ class DriftParams(BaseModel):
         default=LocalizationParams(),
         description="Localization parameters (only used if spike localization was not performed in postprocessing)",
     )
-    decimation_factor: int = Field(
+    scatter_decimate: int = Field(
         default=30,
-        description="The decimation factor for drift visualization. E.g. 30 means that 1 out of 30 spikes is plotted.",
+        description="The decimation factor for scatter plot visualization. E.g. 30 means that 1 out of 30 spikes is plotted.",
     )
     alpha: float = Field(default=0.15, description="Alpha for scatter plot.")
     vmin: float = Field(default=-200, description="Min value for colormap.")
@@ -62,8 +62,8 @@ class SortingSummaryVisualizationParams(BaseModel):
     """
 
     unit_table_properties: list = Field(
-        default=["default_qc"], description="List of properties to show in the unit table."
-    )
+        default=[], description="List of properties to show in the unit table."
+    ) #default=["firing_rate", "amplitude_median", "default_qc"]
     curation: bool = Field(default=True, description="Whether to show curation buttons.")
     label_choices: list = Field(
         default=["SUA", "MUA", "noise"], description="List of labels to choose from (if `curation=True`)"

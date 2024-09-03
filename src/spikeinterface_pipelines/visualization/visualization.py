@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from pathlib import Path
 import numpy as np
@@ -25,7 +25,7 @@ matplotlib.use("agg")
 def visualize(
     recording: si.BaseRecording,
     sorting_curated: si.BaseSorting | None = None,
-    waveform_extractor: si.WaveformExtractor | None = None,
+    sorting_analyzer: si.SortingAnalyzer | None = None,
     visualization_params: VisualizationParams = VisualizationParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/visualization/"),
@@ -39,8 +39,8 @@ def visualize(
         The input processed recording
     sorting_curated: si.BaseSorting | None
         The input curated sorting. If None, only the recording visualization will be generated.
-    waveform_extractor: si.WaveformExtractor | None
-        The input waveform extractor from postprocessing. If None, only the recording visualization will be generated.
+    sorting_analyzer: si.SortingAnalyzer | None
+        The input sorting analyzer from postprocessing. If None, only the recording visualization will be generated.
     visualization_params: VisualizationParams
         The visualization parameters
     scratch_folder: Path
@@ -57,91 +57,108 @@ def visualize(
     visualization_output = {}
     results_folder.mkdir(exist_ok=True, parents=True)
 
-    if kcl.get_client_info() is None:
+    kcl_client = None
+    try:
+        kcl_client = kcl.get_client_info()
+    except:
+        pass
+    if kcl_client is None:
         logger.info(
             "[Visualization] \tKachery client not found. Use `kachery-cloud-init` to initialize kachery client."
         )
-        # return
     visualization_params_dict = visualization_params.model_dump()
     recording_params = visualization_params_dict["recording"]
 
     # Recording visualization
-    cmap = plt.get_cmap(recording_params["drift"]["cmap"])
-    norm = Normalize(vmin=recording_params["drift"]["vmin"], vmax=recording_params["drift"]["vmax"], clip=True)
-    decimation_factor = recording_params["drift"]["decimation_factor"]
-    alpha = recording_params["drift"]["alpha"]
+    drift_params = recording_params["drift"]
 
-    # check if spike locations are available
+    # use spike locations
+    skip_drift = False
     spike_locations_available = False
-    if waveform_extractor is not None:
-        if waveform_extractor.has_extension("spike_locations"):
+    # use spike locations
+    if sorting_analyzer is not None:
+        if sorting_analyzer.has_extension("spike_locations"):
             logger.info("[Visualization] \tVisualizing drift maps using pre-computed spike locations")
-            peaks = waveform_extractor.sorting.to_spike_vector()
-            peak_locations = waveform_extractor.load_extension("spike_locations").get_data()
-            peak_amps = np.concatenate(waveform_extractor.load_extension("spike_amplitudes").get_data())
             spike_locations_available = True
 
-    # otherwise detect peaks
+    # if spike locations are not available, detect and localize peaks
     if not spike_locations_available:
         from spikeinterface.core.node_pipeline import ExtractDenseWaveforms, run_node_pipeline
         from spikeinterface.sortingcomponents.peak_detection import DetectPeakLocallyExclusive
         from spikeinterface.sortingcomponents.peak_localization import LocalizeCenterOfMass
 
-        logger.info("[Visualization] \tVisualizing drift maps using detected peaks (no spike locations available)")
-
-        # Here we use the node pipeline implementation
-        peak_detector_node = DetectPeakLocallyExclusive(recording, **recording_params["drift"]["detection"])
+        logger.info("[Visualization] \tVisualizing drift maps using detected peaks (no spike sorting available)")
+        # locally_exclusive + pipeline steps LocalizeCenterOfMass + PeakToPeakFeature
+        peak_detector_node = DetectPeakLocallyExclusive(recording, **drift_params["detection"])
         extract_dense_waveforms_node = ExtractDenseWaveforms(
             recording,
-            ms_before=recording_params["drift"]["localization"]["ms_before"],
-            ms_after=recording_params["drift"]["localization"]["ms_after"],
+            ms_before=drift_params["localization"]["ms_before"],
+            ms_after=drift_params["localization"]["ms_after"],
             parents=[peak_detector_node],
             return_output=False,
         )
         localize_peaks_node = LocalizeCenterOfMass(
             recording,
-            radius_um=recording_params["drift"]["localization"]["radius_um"],
+            radius_um=drift_params["localization"]["radius_um"],
             parents=[peak_detector_node, extract_dense_waveforms_node],
         )
-        job_kwargs = si.get_global_job_kwargs()
         pipeline_nodes = [peak_detector_node, extract_dense_waveforms_node, localize_peaks_node]
-        peaks, peak_locations = run_node_pipeline(recording, nodes=pipeline_nodes, job_kwargs=job_kwargs)
-        logger.info(f"[Visualization] \tDetected {len(peaks)} peaks")
+        peaks, peak_locations = run_node_pipeline(
+            recording, nodes=pipeline_nodes, job_kwargs=si.get_global_job_kwargs()
+        )
+        logger.info("[Visualization] \t\tDetected {len(peaks)} peaks")
         peak_amps = peaks["amplitude"]
+        if len(peaks) == 0:
+            logger.info("[Visualization] \t\tNo peaks detected. Skipping drift map")
+            skip_drift = True
 
-    y_locs = recording.get_channel_locations()[:, 1]
-    ylim = [np.min(y_locs), np.max(y_locs)]
+    if not skip_drift:
+        fig_drift, axs_drift = plt.subplots(
+            ncols=recording.get_num_segments(), figsize=drift_params["figsize"]
+        )
+        y_locs = recording.get_channel_locations()[:, 1]
+        depth_lim = [np.min(y_locs), np.max(y_locs)]
 
-    fig_drift, axs_drift = plt.subplots(
-        ncols=recording.get_num_segments(), figsize=recording_params["drift"]["figsize"]
-    )
-    for segment_index in range(recording.get_num_segments()):
-        segment_mask = peaks["segment_index"] == segment_index
-        x = peaks[segment_mask]["sample_index"] / recording.sampling_frequency
-        y = peak_locations[segment_mask]["y"]
-        # subsample
-        x_sub = x[::decimation_factor]
-        y_sub = y[::decimation_factor]
-        a_sub = peak_amps[::decimation_factor]
-        colors = cmap(norm(a_sub))
+        for segment_index in range(recording.get_num_segments()):
+            if recording.get_num_segments() == 1:
+                ax_drift = axs_drift
+            else:
+                ax_drift = axs_drift[segment_index]
+            if spike_locations_available:
+                sorting_analyzer_to_plot = sorting_analyzer
+                peaks_to_plot = None
+                peak_locations_to_plot = None
+                sampling_frequency = None
+            else:
+                sorting_analyzer_to_plot = None
+                peaks_to_plot = peaks
+                peak_locations_to_plot = peak_locations
+                sampling_frequency = recording.sampling_frequency
 
-        if recording.get_num_segments() == 1:
-            ax_drift = axs_drift
-        else:
-            ax_drift = axs_drift[segment_index]
-        ax_drift.scatter(x_sub, y_sub, s=1, c=colors, alpha=alpha)
-        ax_drift.set_xlabel("time (s)", fontsize=12)
-        ax_drift.set_ylabel("depth ($\\mu$m)", fontsize=12)
-        ax_drift.set_xlim(0, recording.get_num_samples(segment_index=segment_index) / recording.sampling_frequency)
-        ax_drift.set_ylim(ylim)
-        ax_drift.spines["top"].set_visible(False)
-        ax_drift.spines["right"].set_visible(False)
+            _ = sw.plot_drift_raster_map(
+                sorting_analyzer=sorting_analyzer_to_plot,
+                peaks=peaks_to_plot,
+                peak_locations=peak_locations_to_plot,
+                sampling_frequency=sampling_frequency,
+                segment_index=segment_index,
+                depth_lim=depth_lim,
+                clim=(drift_params["vmin"], drift_params["vmax"]),
+                cmap=drift_params["cmap"],
+                scatter_decimate=drift_params["scatter_decimate"],
+                alpha=drift_params["alpha"],
+                ax=ax_drift
+            )
+            ax_drift.spines["top"].set_visible(False)
+            ax_drift.spines["right"].set_visible(False)
+
     fig_drift_folder = results_folder / "drift_maps"
     fig_drift_folder.mkdir(exist_ok=True)
     fig_drift.savefig(fig_drift_folder / f"drift.png", dpi=300)
 
     # make a sorting view View
     v_drift = svv.TabLayoutItem(label=f"Drift map", view=svv.Image(image_path=str(fig_drift_folder / f"drift.png")))
+
+    # TODO add motion
 
     # timeseries
     if not recording_params["timeseries"]["skip"]:
@@ -191,28 +208,21 @@ def visualize(
             print(f"Something wrong when visualizing timeseries: {e}")
 
     # Sorting summary
-    if waveform_extractor is None:
-        logger.info("[Visualization] \tNo waveform extractor found. Skipping sorting summary visualization")
+    if sorting_analyzer is None:
+        logger.info("[Visualization] \tNo sorting analyzer found. Skipping sorting summary visualization")
         return visualization_output
 
     logger.info("[Visualization] \tVisualizing sorting summary")
-    # set waveform_extractor sorting object to have pass_qc property
+    # set sorting_analyzer sorting object to have pass_qc property
     if sorting_curated is not None:
-        waveform_extractor.sorting = sorting_curated
+        sorting_analyzer.sorting = sorting_curated
 
     sorting_summary_params = visualization_params_dict["sorting_summary"]
 
-    if len(waveform_extractor.unit_ids) > 0:
+    if len(sorting_analyzer.unit_ids) > 0:
         unit_table_properties = sorting_summary_params["unit_table_properties"]
-        # skip missing properties
-        for prop in unit_table_properties:
-            if prop not in waveform_extractor.sorting.get_property_keys():
-                logger.info(
-                    f"[Visualization] \tProperty {prop} not found in sorting object. Not adding to unit table"
-                )
-                unit_table_properties.remove(prop)
         v_sorting = sw.plot_sorting_summary(
-            waveform_extractor,
+            sorting_analyzer,
             unit_table_properties=sorting_summary_params["unit_table_properties"],
             curation=sorting_summary_params["unit_table_properties"],
             label_choices=sorting_summary_params["label_choices"],

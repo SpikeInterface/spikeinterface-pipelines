@@ -3,7 +3,7 @@ from .params import (
     SpikeSortingParams,
     Kilosort25Model,
     Kilosort3Model,
-    IronClustModel,
+    Kilosort4Model,
     MountainSort5Model,
     # SpykingCircus2Model
 )

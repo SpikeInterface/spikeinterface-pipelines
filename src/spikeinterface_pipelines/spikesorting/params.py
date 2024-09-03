@@ -1,14 +1,16 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Union, List, Optional
 from enum import Enum
+from pydantic import BaseModel, Field
+from typing import Union, List
 
 
 class SorterName(str, Enum):
     kilosort25 = "kilosort2_5"
     kilosort3 = "kilosort3"
+    kilosort4 = "kilosort4"
     mountainsort5 = "mountainsort5"
     # spykingcircus2 = "spykingcircus2"
-    ironclust = "ironclust"
 
 
 class Kilosort25Model(BaseModel):
@@ -86,6 +88,51 @@ class MountainSort5Model(BaseModel):
     whiten: bool = Field(default=True, description="Enable or disable whiten")
 
 
+class Kilosort4Model(BaseModel):
+    batch_size: int = Field(default=60000, description="Number of samples included in each batch of data.")
+    nblocks: int = Field(default=1, description="Number of non-overlapping blocks for drift correction (additional nblocks-1 blocks are created in the overlaps). Default value: 1.")
+    Th_universal: int = Field(default=9, description="Spike detection threshold for universal templates. Th(1) in previous versions of Kilosort. Default value: 9.")
+    Th_learned: int = Field(default=8, description="Spike detection threshold for learned templates. Th(2) in previous versions of Kilosort. Default value: 8.")
+    do_CAR: bool = Field(default=True, description="Whether to perform common average reference. Default value: True.")
+    invert_sign: bool = Field(default=False, description="Invert the sign of the data. Default value: False.")
+    nt: int = Field(default=61, description="Number of samples per waveform. Also size of symmetric padding for filtering. Default value: 61.")
+    shift: Union[None, int] = Field(default=None, description="Scalar shift to apply to data before all other operations. Default None.")
+    scale: Union[None, int] = Field(default=None, description="Scaling factor to apply to data before all other operations. Default None.")
+    artifact_threshold: Union[None, int] = Field(default=None, description="If a batch contains absolute values above this number, it will be zeroed out under the assumption that a recording artifact is present. By default, the threshold is infinite (so that no zeroing occurs). Default value: None.")
+    nskip: int = Field(default=25, description="Batch stride for computing whitening matrix. Default value: 25.")
+    whitening_range: int = Field(default=32, description="Number of nearby channels used to estimate the whitening matrix. Default value: 32.")
+    binning_depth: int = Field(default=5, description="For drift correction, vertical bin size in microns used for 2D histogram. Default value: 5.")
+    sig_interp: int = Field(default=20, description="For drift correction, sigma for interpolation (spatial standard deviation). Approximate smoothness scale in units of microns. Default value: 20.")
+    drift_smoothing: List[float] = Field(default=[0.5, 0.5, 0.5], description="Amount of gaussian smoothing to apply to the spatiotemporal drift estimation, for x,y,time axes in units of registration blocks (for x,y axes) and batch size (for time axis). The x,y smoothing has no effect for `nblocks = 1`.")
+    nt0min: Union[None, int] = Field(default=None, description="Sample index for aligning waveforms, so that their minimum or maximum value happens here. Default of 20. Default value: None.")
+    dmin: Union[None, int] = Field(default=None, description="Vertical spacing of template centers used for spike detection, in microns. Determined automatically by default. Default value: None.")
+    dminx: int = Field(default=32, description="Horizontal spacing of template centers used for spike detection, in microns. Default value: 32.")
+    min_template_size: int = Field(default=10, description="Standard deviation of the smallest, spatial envelope Gaussian used for universal templates. Default value: 10.")
+    template_sizes: int = Field(default=5, description="Number of sizes for universal spike templates (multiples of the min_template_size). Default value: 5.")
+    nearest_chans: int = Field(default=10, description="Number of nearest channels to consider when finding local maxima during spike detection. Default value: 10.")
+    nearest_templates: int = Field(default=100, description="Number of nearest spike template locations to consider when finding local maxima during spike detection. Default value: 100.")
+    max_channel_distance: Union[None, int] = Field(default=None, description="Templates farther away than this from their nearest channel will not be used. Also limits distance between compared channels during clustering. Default value: None.")
+    templates_from_data: bool = Field(default=True, description="Indicates whether spike shapes used in universal templates should be estimated from the data or loaded from the predefined templates. Default value: True.")
+    n_templates: int = Field(default=6, description="Number of single-channel templates to use for the universal templates (only used if templates_from_data is True). Default value: 6.")
+    n_pcs: int = Field(default=6, description="Number of single-channel PCs to use for extracting spike features (only used if templates_from_data is True). Default value: 6.")
+    Th_single_ch: int = Field(default=6, description="For single channel threshold crossings to compute universal- templates. In units of whitened data standard deviations. Default value: 6.")
+    acg_threshold: float = Field(default=0.2, description='Fraction of refractory period violations that are allowed in the ACG compared to baseline; used to assign "good" units. Default value: 0.2.')
+    ccg_threshold: float = Field(default=0.25, description="Fraction of refractory period violations that are allowed in the CCG compared to baseline; used to perform splits and merges. Default value: 0.25.")
+    cluster_downsampling: int = Field(default=20, description="Inverse fraction of nodes used as landmarks during clustering (can be 1, but that slows down the optimization). Default value: 20.")
+    cluster_pcs: int = Field(default=64, description="Maximum number of spatiotemporal PC features used for clustering. Default value: 64.")
+    x_centers: Union[None, int] = Field(default=None, description="Number of x-positions to use when determining center points for template groupings. If None, this will be determined automatically by finding peaks in channel density. For 2D array type probes, we recommend specifying this so that centers are placed every few hundred microns.")
+    duplicate_spike_bins: int = Field(default=7, description="Number of bins for which subsequent spikes from the same cluster are assumed to be artifacts. A value of 0 disables this step. Default value: 7.")
+    do_correction: bool = Field(default=True, description="If True, drift correction is performed")
+    save_extra_kwargs: bool = Field(default=False, description="If True, additional kwargs are saved to the output")
+    skip_kilosort_preprocessing: bool = Field(default=False, description="Can optionally skip the internal kilosort preprocessing")
+    scaleproc: Union[None, int] = Field(default=None, description="int16 scaling of whitened data, if None set to 200.")
+    torch_device: str = Field(default="auto", description="Select the torch device auto/cuda/cpu")
+    # THESE 2 PARAMS REUQIRE A NEW RELEASE OD SPIKEINTERFACE
+    # ist[int]] = Field(default=None, description="List of bad channels to exclude from spike detection and clustering.")
+    # save_preprocessed_copy: bool = Field(default=False, description="save a pre-processed copy of the data (including drift correction) to temp_wh.dat in the results directory and format Phy output to use that copy of the data")
+
+
+
 ## SpykingCircus2 - WIP
 # class SpykingCircus2GeneralModel(BaseModel):
 #     ms_before: int = Field(default=2, description="ms before")
@@ -141,16 +188,14 @@ class MountainSort5Model(BaseModel):
 #     cache_preprocessing: SpykingCircus2CacheModel = Field(default=SpykingCircus2CacheModel(), description="Cache preprocessing")
 
 
-class IronClustModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    pass
-
-
 class SpikeSortingParams(BaseModel):
     sorter_name: SorterName = Field(description="Name of the sorter to use.")
-    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, MountainSort5Model, IronClustModel] = Field(
+    sorter_kwargs: Union[Kilosort25Model, Kilosort3Model, Kilosort4Model, MountainSort5Model] = Field(
         description="Sorter specific kwargs.", union_mode="left_to_right"
     )
     spikesort_by_group: bool = Field(
         default=False, description="If True, spike sorting is run for each group separately."
     )
+
+
+

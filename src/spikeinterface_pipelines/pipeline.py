@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 from pathlib import Path
 from typing import Tuple
 import spikeinterface as si
@@ -11,7 +11,7 @@ from .spikesorting import (
     SpikeSortingParams,
     Kilosort25Model,
     Kilosort3Model,
-    IronClustModel,
+    Kilosort4Model,
     MountainSort5Model,
     # SpykingCircus2Model,
 )
@@ -23,9 +23,9 @@ from .visualization import visualize, VisualizationParams
 sorter_model_map = {
     "kilosort25": Kilosort25Model,
     "kilosort3": Kilosort3Model,
+    "kilosort4": Kilosort4Model,
     "mountainsort5": MountainSort5Model,
     # "spykingcircus2": SpykingCircus2Model,
-    "ironclust": IronClustModel,
 }
 
 
@@ -47,7 +47,7 @@ def run_pipeline(
 ) -> Tuple[
     si.BaseRecording | None,
     si.BaseSorting | None,
-    si.WaveformExtractor | None,
+    si.SortingAnalyzer | None,
     si.BaseSorting | None,
     dict | None,
 ]:

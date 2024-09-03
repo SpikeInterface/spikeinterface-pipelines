@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 from pathlib import Path
 import re
 
@@ -12,7 +12,7 @@ from .params import CurationParams
 
 
 def curate(
-    waveform_extractor: si.WaveformExtractor,
+    sorting_analyzer: si.SortingAnalyzer,
     curation_params: CurationParams = CurationParams(),
     scratch_folder: Path = Path("./scratch/"),
     results_folder: Path = Path("./results/curation/"),
@@ -23,8 +23,8 @@ def curate(
 
     Parameters
     ----------
-    waveform_extractor: si.WaveformExtractor
-        The input waveform extractor
+    sorting_analyzer: si.SortingAnalyzer
+        The input sorting analyzer
     curation_params: CurationParams
         Curation parameters
     scratch_folder: Path
@@ -38,11 +38,11 @@ def curate(
         Curated sorting
     """
     # get quality metrics
-    if not waveform_extractor.has_extension("quality_metrics"):
-        logger.info(f"[Curation] \tQuality metrics not found in WaveformExtractor.")
+    if not sorting_analyzer.has_extension("quality_metrics"):
+        logger.info(f"[Curation] \tQuality metrics not found in SortingAnalyzer.")
         return
 
-    qm = waveform_extractor.load_extension("quality_metrics").get_data()
+    qm = sorting_analyzer.get_extension("quality_metrics").get_data()
     # check query validity against quality metrics
     quality_metrics_in_query = re.split(">|<|>=|<=|==|and", curation_params.curation_query)[::2]
     quality_metrics_in_query = [qm_name.strip() for qm_name in quality_metrics_in_query]
@@ -57,8 +57,8 @@ def curate(
     curated_unit_ids = qm_curated.index.values
 
     # flag units as good/bad depending on QC selection
-    qc_quality = [True if unit in curated_unit_ids else False for unit in waveform_extractor.unit_ids]
-    sorting_curated = waveform_extractor.sorting
+    qc_quality = [True if unit in curated_unit_ids else False for unit in sorting_analyzer.unit_ids]
+    sorting_curated = sorting_analyzer.sorting
     sorting_curated.set_property("default_qc", qc_quality)
     n_units = int(len(sorting_curated.unit_ids))
     n_passing = int(np.sum(qc_quality))

@@ -9,10 +9,18 @@ class PreprocessingStrategy(str, Enum):
     destripe = "destripe"
 
 
+class FilterType(str, Enum):
+    highpass = "highpass"
+    bandpass = "bandpass"
+
 class HighpassFilter(BaseModel):
     freq_min: float = Field(default=300.0, description="Minimum frequency for the highpass filter")
     margin_ms: float = Field(default=5.0, description="Margin in milliseconds")
 
+class BandpassFilter(BaseModel):
+    freq_min: float = Field(default=300.0, description="Minimum frequency for the highpass filter")
+    freq_max: float = Field(default=6000.0, description="Maximum frequency for the highpass filter")
+    margin_ms: float = Field(default=5.0, description="Margin in milliseconds")
 
 class PhaseShift(BaseModel):
     margin_ms: float = Field(default=100.0, description="Margin in milliseconds for phase shift")
@@ -87,13 +95,49 @@ class MCLocalizeGridConvolution(BaseModel):
 class MCEstimateMotionDecentralized(BaseModel):
     method: str = Field(default="decentralized", description="")
     direction: str = Field(default="y", description="")
-    bin_duration_s: float = Field(default=2.0, description="")
     rigid: bool = Field(default=False, description="")
+    bin_s: float = Field(default=2.0, description="")
     bin_um: float = Field(default=5.0, description="")
     margin_um: float = Field(default=0.0, description="")
     win_shape: str = Field(default="gaussian", description="")
     win_step_um: float = Field(default=100.0, description="")
-    win_sigma_um: float = Field(default=200.0, description="")
+    win_scale_um: float = Field(default=200.0, description="")
+    win_margin_um: Optional[float] = Field(default=None, description="")
+    histogram_depth_smooth_um: float = Field(default=5.0, description="")
+    histogram_time_smooth_s: Optional[float] = Field(default=None, description="")
+    pairwise_displacement_method: str = Field(default="conv", description="")
+    max_displacement_um: float = Field(default=100.0, description="")
+    weight_scale: str = Field(default="linear", description="")
+    error_sigma: float = Field(default=0.2, description="")
+    conv_engine: Optional[str] = Field(default=None, description="")
+    torch_device: Optional[str] = Field(default=None, description="")
+    batch_size: int = Field(default=1, description="")
+    corr_threshold: float = Field(default=0.0, description="")
+    time_horizon_s: Optional[float] = Field(default=None, description="")
+    convergence_method: str = Field(default="lsmr", description="")
+    soft_weights: bool = Field(default=False, description="")
+    normalized_xcorr: bool = Field(default=True, description="")
+    centered_xcorr: bool = Field(default=True, description="")
+    temporal_prior: bool = Field(default=True, description="")
+    spatial_prior: bool = Field(default=False, description="")
+    force_spatial_median_continuity: bool = Field(default=False, description="")
+    reference_displacement: str = Field(default="median", description="")
+    reference_displacement_time_s: float = Field(default=0, description="")
+    robust_regression_sigma: int = Field(default=2, description="")
+    weight_with_amplitude: bool = Field(default=False, description="")
+
+
+class MCEstimateMotionDredgeAP(BaseModel):
+    method: str = Field(default="dredge_ap", description="")
+    direction: str = Field(default="y", description="")
+    rigid: bool = Field(default=False, description="")
+    bin_s: float = Field(default=2.0, description="")
+    bin_um: float = Field(default=5.0, description="")
+    margin_um: float = Field(default=0.0, description="")
+    win_shape: str = Field(default="gaussian", description="")
+    win_step_um: float = Field(default=100.0, description="")
+    win_scale_um: float = Field(default=200.0, description="")
+    win_margin_um: Optional[float] = Field(default=None, description="")
     histogram_depth_smooth_um: float = Field(default=5.0, description="")
     histogram_time_smooth_s: Optional[float] = Field(default=None, description="")
     pairwise_displacement_method: str = Field(default="conv", description="")
@@ -119,10 +163,10 @@ class MCEstimateMotionDecentralized(BaseModel):
 
 
 class MCEstimateMotionIterativeTemplate(BaseModel):
-    bin_duration_s: float = Field(default=2.0, description="")
+    bin_s: float = Field(default=2.0, description="")
     rigid: bool = Field(default=False, description="")
     win_step_um: float = Field(default=50.0, description="")
-    win_sigma_um: float = Field(default=150.0, description="")
+    win_scale_um: float = Field(default=150.0, description="")
     margin_um: float = Field(default=0.0, description="")
     win_shape: str = Field(default="rect", description="")
 
@@ -131,7 +175,7 @@ class MCInterpolateMotionKwargs(BaseModel):
     direction: int = Field(
         default=1, description="0 | 1 | 2. Dimension along which channel_locations are shifted (0 - x, 1 - y, 2 - z)."
     )
-    border_mode: str = Field(
+    border_mode: Literal["remove_channels", "force_extrapolate", "force_zeros"] = Field(
         default="remove_channels",
         description="'remove_channels' | 'force_extrapolate' | 'force_zeros'. Control how channels are handled on border.",
     )
@@ -143,6 +187,26 @@ class MCInterpolateMotionKwargs(BaseModel):
     num_closest: int = Field(
         default=3, description="Number of closest channels used by 'idw' method for interpolation."
     )
+
+
+class MCDredge(BaseModel):
+    detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
+    localize_peaks_kwargs: MCLocalizeMonopolarTriangulation = Field(
+        default=MCLocalizeMonopolarTriangulation(), description=""
+    )
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDredgeAP(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
+
+
+class MCDredgeFast(BaseModel):
+    detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
+    localize_peaks_kwargs: MCLocalizeGridConvolution = Field(default=MCLocalizeGridConvolution(), description="")
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDredgeAP(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
 
 
 class MCNonrigidAccurate(BaseModel):
@@ -165,11 +229,20 @@ class MCNonrigidFastAndAccurate(BaseModel):
     interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
 
 
+class MCNonrigidFastAndAccurate(BaseModel):
+    detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
+    localize_peaks_kwargs: MCLocalizeGridConvolution = Field(default=MCLocalizeGridConvolution(), description="")
+    estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
+        default=MCEstimateMotionDecentralized(), description=""
+    )
+    interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
+
+
 class MCRigidFast(BaseModel):
     detect_kwargs: MCDetectKwargs = Field(default=MCDetectKwargs(), description="")
     localize_peaks_kwargs: MCLocalizeCenterOfMass = Field(default=MCLocalizeCenterOfMass(), description="")
     estimate_motion_kwargs: MCEstimateMotionDecentralized = Field(
-        default=MCEstimateMotionDecentralized(bin_duration_s=10.0, rigid=True), description=""
+        default=MCEstimateMotionDecentralized(bin_s=10.0, rigid=True), description=""
     )
     interpolate_motion_kwargs: MCInterpolateMotionKwargs = Field(default=MCInterpolateMotionKwargs(), description="")
 
@@ -187,6 +260,8 @@ class MCKilosortLike(BaseModel):
 
 
 class MCPreset(str, Enum):
+    dredge = "dredge"
+    dredge_fast = "dredge_fast"
     nonrigid_accurate = "nonrigid_accurate"
     nonrigid_fast_and_accurate = "nonrigid_fast_and_accurate"
     rigid_fast = "rigid_fast"
@@ -198,9 +273,9 @@ class MotionCorrection(BaseModel):
         default="compute", description="What strategy to use for motion correction"
     )
     preset: MCPreset = Field(
-        default=MCPreset.nonrigid_fast_and_accurate.value, description="Preset for motion correction"
+        default="dredge_fast", description="Preset for motion correction"
     )
-    motion_kwargs: Union[MCNonrigidAccurate, MCNonrigidFastAndAccurate, MCRigidFast, MCKilosortLike] = Field(
+    motion_kwargs: Union[MCDredge, MCDredgeFast, MCNonrigidAccurate, MCNonrigidFastAndAccurate, MCRigidFast, MCKilosortLike] = Field(
         default=MCNonrigidFastAndAccurate(), description="Motion correction parameters"
     )
 
@@ -208,7 +283,9 @@ class MotionCorrection(BaseModel):
 # Preprocessing params ---------------------------------------------------------------
 class PreprocessingParams(BaseModel):
     preprocessing_strategy: PreprocessingStrategy = Field(default="cmr", description="Strategy for preprocessing")
+    filter_type: FilterType = Field(default="highpass", description="Type of filter")
     highpass_filter: HighpassFilter = Field(default=HighpassFilter(), description="Highpass filter")
+    bandpass_filter: BandpassFilter = Field(default=BandpassFilter(), description="Bandpass filter")
     phase_shift: PhaseShift = Field(default=PhaseShift(), description="Phase shift")
     common_reference: CommonReference = Field(default=CommonReference(), description="Common reference")
     highpass_spatial_filter: HighpassSpatialFilter = Field(
