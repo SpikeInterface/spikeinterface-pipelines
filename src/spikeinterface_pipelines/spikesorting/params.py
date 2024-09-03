@@ -59,9 +59,6 @@ class Kilosort3Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
     pass
 
-class Kilosort4Model(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    pass
 
 class MountainSort5Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
